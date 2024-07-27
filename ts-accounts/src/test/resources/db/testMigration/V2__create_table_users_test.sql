@@ -1,9 +1,6 @@
-CREATE SEQUENCE IF NOT EXISTS accounts.users_sequence
-INCREMENT BY 1;
-
-CREATE TABLE IF NOT EXISTS accounts.users
+CREATE TABLE IF NOT EXISTS accounts_test.users
 (
-    id bigint NOT NULL,
+    id bigserial NOT NULL,
     username character varying(256) NOT NULL,
     first_name character varying(256) NOT NULL,
     third_name character varying(256),

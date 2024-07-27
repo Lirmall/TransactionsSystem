@@ -15,10 +15,11 @@ import java.util.List;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_sequence_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_seq")
     @SequenceGenerator(
-            name="users_sequence_generator",
-            sequenceName = "users_sequence"
+            name="users_id_seq",
+            sequenceName = "users_id_seq",
+            allocationSize = 1
     )
     @Column(name = "id")
     private Long id;
@@ -40,6 +41,12 @@ public class UserEntity {
 
     @Column(name = "phone_number")
     private String phoneNumber;
+
+    @Column(name = "blocked")
+    private Boolean blocked;
+
+    @Column(name = "deleted")
+    private Boolean deleted;
 
     @OneToMany(mappedBy = "ownerUserId", fetch = FetchType.LAZY)
     private List<BankAccountEntity> bankAccountsList;

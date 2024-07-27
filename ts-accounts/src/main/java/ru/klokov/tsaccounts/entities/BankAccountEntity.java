@@ -13,10 +13,11 @@ import lombok.Setter;
 public class BankAccountEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "bank_accounts_sequence_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "bank_accounts_id_seq")
     @SequenceGenerator(
-            name="bank_accounts_sequence_generator",
-            sequenceName = "bank_accounts_sequence"
+            name="bank_accounts_id_seq",
+            sequenceName = "bank_accounts_id_seq",
+            allocationSize = 1
     )
     @Column(name = "id")
     private Long id;
@@ -24,10 +25,12 @@ public class BankAccountEntity {
     @Column(name = "owner_user", insertable = false, updatable = false)
     private Long ownerUserId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_user")
-    private UserEntity userEntity;
-
     @Column(name = "balance")
     private Double balance;
+
+    @Column(name = "blocked")
+    private Boolean blocked;
+
+    @Column(name = "deleted")
+    private Boolean deleted;
 }
