@@ -16,7 +16,6 @@ import ru.klokov.tsaccounts.exceptions.VerificationException;
 import ru.klokov.tsaccounts.models.UserModel;
 import ru.klokov.tsaccounts.specifications.user.UserSearchModel;
 import ru.klokov.tsaccounts.test_objects.UserSearchModelReturner;
-import ru.klokov.tsaccounts.test_utils.FieldsSouter;
 
 import java.util.List;
 

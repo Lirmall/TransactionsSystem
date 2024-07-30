@@ -13,4 +13,5 @@ public class SearchCriteria {
     private String fieldName;
     private String operation;
     private Object fieldValue;
+    private boolean orPredicate = false;
 }
