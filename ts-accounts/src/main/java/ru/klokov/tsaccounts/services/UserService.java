@@ -2,6 +2,8 @@ package ru.klokov.tsaccounts.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tsaccounts.dtos.UserDto;
@@ -12,6 +14,9 @@ import ru.klokov.tsaccounts.exceptions.VerificationException;
 import ru.klokov.tsaccounts.mappers.UserEntityMapper;
 import ru.klokov.tsaccounts.models.UserModel;
 import ru.klokov.tsaccounts.repositories.UserRepository;
+import ru.klokov.tsaccounts.specifications.sort.UserSortChecker;
+import ru.klokov.tsaccounts.specifications.user.UserSearchModel;
+import ru.klokov.tsaccounts.specifications.user.UserSpecification;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +30,7 @@ public class UserService {
 
     private final UserEntityMapper userEntityMapper;
     private final UserRepository userRepository;
+    private final UserSortChecker userSortChecker;
 
     @Transactional
     public UserModel create(UserDto entity) {
@@ -69,6 +75,13 @@ public class UserService {
             log.error("User wit id {} not found in database", id);
             throw new NoMatchingEntryInDatabaseException(String.format("User wit id %s not found in database", id));
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserDto> findByFilter(UserSearchModel model) {
+        Pageable pageable = userSortChecker.getPageableAndSort(model);
+        Page<UserEntity> userEntities = userRepository.findAll(new UserSpecification(model), pageable);
+        return userEntities.map(userEntityMapper::convertEntityToDTO);
     }
 
     private boolean emailVerification(String email) {

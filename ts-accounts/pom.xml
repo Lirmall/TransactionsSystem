@@ -163,6 +163,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/dtos/**,**/mappers/**,**/models/**,**/logging/**,**/entities/**</exclude>
+                        <exclude>**/specifications/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
