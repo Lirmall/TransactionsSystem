@@ -2,7 +2,6 @@ package ru.klokov.tsaccounts.services;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.modelmapper.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -15,7 +14,6 @@ import ru.klokov.tsaccounts.exceptions.VerificationException;
 import ru.klokov.tsaccounts.models.BankAccountModel;
 import ru.klokov.tsaccounts.specifications.bank_account.BankAccountSearchModel;
 import ru.klokov.tsaccounts.test_objects.BankAccountSearchModelReturner;
-import ru.klokov.tsaccounts.test_utils.FieldsSouter;
 
 import java.util.List;
 
