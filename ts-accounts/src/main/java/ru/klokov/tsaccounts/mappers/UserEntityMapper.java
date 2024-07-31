@@ -33,4 +33,11 @@ public class UserEntityMapper {
         modelMapper.map(entity, userModel);
         return userModel;
     }
+
+    public UserEntity convertModelToEntity(UserModel model) {
+        UserEntity userEntity = new UserEntity();
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        modelMapper.map(model, userEntity);
+        return userEntity;
+    }
 }

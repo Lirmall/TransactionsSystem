@@ -10,10 +10,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Информация о пользователе")
-public class UserDto {
-    @Schema(description = "Идентификатор пользователя", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Long id = null;
+@Schema(name = "CreateAndUpdateUserDto",
+        description = "Информация о пользователе при создании")
+public class CreateAndUpdateUserDto {
     @Schema(description = "Уникальный логин пользователя", requiredMode = Schema.RequiredMode.REQUIRED)
     private String username;
     @Schema(description = "Фамилия пользователя", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -30,8 +29,4 @@ public class UserDto {
             requiredMode = Schema.RequiredMode.REQUIRED,
             example = "+1(111) 111-1111")
     private String phoneNumber;
-    @Schema(description = "Признак заблокированного пользователя", requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "false")
-    private Boolean blocked = false;
-    @Schema(description = "Признак удалённоно пользователя", requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "false")
-    private Boolean deleted = false;
 }

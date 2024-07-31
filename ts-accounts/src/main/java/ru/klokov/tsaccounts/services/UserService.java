@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.klokov.tsaccounts.dtos.CreateAndUpdateUserDto;
 import ru.klokov.tsaccounts.dtos.UserDto;
 import ru.klokov.tsaccounts.entities.UserEntity;
 import ru.klokov.tsaccounts.exceptions.AlreadyCreatedException;
@@ -30,32 +31,43 @@ public class UserService {
 
     private final UserEntityMapper userEntityMapper;
     private final UserRepository userRepository;
+    private final UserBankAccountService userBankAccountService;
     private final UserSortChecker userSortChecker;
 
     @Transactional
-    public UserModel create(UserDto entity) {
-        Optional<UserEntity> foundUser = userRepository.findUserEntityByUsername(entity.getUsername());
+    public UserModel create(CreateAndUpdateUserDto userDto) {
+        log.debug("Verification user data");
+        Optional<UserEntity> foundUser = userRepository.findUserEntityByUsername(userDto.getUsername());
 
         if(foundUser.isPresent()) {
-            log.error("Error with create user - User with username \"{}\" already exists in the system", entity.getUsername());
-            throw new AlreadyCreatedException(String.format("User with username \"%s\" already exists in the system", entity.getUsername()));
+            log.error("Error with create user - User with username \"{}\" already exists in the system", userDto.getUsername());
+            throw new AlreadyCreatedException(String.format("User with username \"%s\" already exists in the system", userDto.getUsername()));
         }
 
-        if(!this.emailVerification(entity.getEmail())) {
-            log.error("Email verification error - \"{}\" - email does not meet requirements", entity.getEmail());
-            throw new VerificationException(String.format("Email verification error - \"%s\" - email does not meet requirements", entity.getEmail()));
+        if(!this.emailVerification(userDto.getEmail())) {
+            log.error("Email verification error - \"{}\" - email does not meet requirements", userDto.getEmail());
+            throw new VerificationException(String.format("Email verification error - \"%s\" - email does not meet requirements", userDto.getEmail()));
         }
+
+        if(!this.usernameVerification(userDto.getUsername())) {
+            log.error("Username verification error - \"{}\" - username does not meet requirements", userDto.getEmail());
+            throw new VerificationException(String.format("Username verification error - \"%s\" - username does not meet requirements", userDto.getEmail()));
+        }
+
+        log.debug("Verification success. Create user");
 
         UserEntity userToSave = new UserEntity();
-        userToSave.setUsername(entity.getUsername());
-        userToSave.setFirstName(entity.getFirstName());
-        userToSave.setSecondName(entity.getSecondName());
-        userToSave.setThirdName(entity.getThirdName());
-        userToSave.setEmail(entity.getEmail());
-        userToSave.setPhoneNumber(entity.getPhoneNumber());
+        userToSave.setUsername(userDto.getUsername());
+        userToSave.setFirstName(userDto.getFirstName());
+        userToSave.setSecondName(userDto.getSecondName());
+        userToSave.setThirdName(userDto.getThirdName());
+        userToSave.setEmail(userDto.getEmail());
+        userToSave.setPhoneNumber(userDto.getPhoneNumber());
 
-        log.info("User successful created");
-        return userEntityMapper.convertEntityToModel(userRepository.save(userToSave));
+        UserEntity userEntity = userRepository.save(userToSave);
+
+        log.debug("User with username \"{}\" successful created", userEntity.getUsername());
+        return userEntityMapper.convertEntityToModel(userEntity);
     }
 
     @Transactional(readOnly = true)
@@ -78,16 +90,52 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Page<UserDto> findByFilter(UserSearchModel model) {
+    public Page<UserModel> findByFilter(UserSearchModel model) {
         Pageable pageable = userSortChecker.getPageableAndSort(model);
         Page<UserEntity> userEntities = userRepository.findAll(new UserSpecification(model), pageable);
-        return userEntities.map(userEntityMapper::convertEntityToDTO);
+        return userEntities.map(userEntityMapper::convertEntityToModel);
+    }
+
+    @Transactional
+    public UserModel updateUserById(Long id, CreateAndUpdateUserDto newUserInfo) {
+        log.debug("Try to find user with id {} in DB to update", id);
+
+        UserEntity userToUpdate = userEntityMapper.convertModelToEntity(findById(id));
+
+        userToUpdate.setUsername(newUserInfo.getUsername());
+        userToUpdate.setFirstName(newUserInfo.getFirstName());
+        userToUpdate.setSecondName(newUserInfo.getSecondName());
+        userToUpdate.setThirdName(newUserInfo.getThirdName());
+        userToUpdate.setEmail(newUserInfo.getEmail());
+        userToUpdate.setPhoneNumber(newUserInfo.getPhoneNumber());
+
+        log.debug("User with id {} successful updated", id);
+        return userEntityMapper.convertEntityToModel(userRepository.save(userToUpdate));
+    }
+
+    @Transactional
+    public UserDto blockUserById(Long id) {
+        log.debug("Try to find user with id {} in DB", id);
+
+        UserEntity userToBlock = userEntityMapper.convertModelToEntity(findById(id));
+
+        userToBlock.setBlocked(true);
+        userBankAccountService.blockBankAccountsByOwnerUserId(id);
+
+        return userEntityMapper.convertEntityToDTO(userRepository.save(userToBlock));
     }
 
     private boolean emailVerification(String email) {
         String regex = "^[a-zA-Z0-9_\\-\\.]*@[a-zA-Z_\\-]*\\.[a-zA-Z]{2,}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+
+    private boolean usernameVerification(String username) {
+        String regex = "^[a-zA-Z0-9_\\-\\.]{5,}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(username);
         return matcher.matches();
     }
 }
