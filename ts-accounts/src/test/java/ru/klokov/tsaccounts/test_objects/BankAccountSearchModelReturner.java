@@ -16,4 +16,48 @@ public class BankAccountSearchModelReturner {
 
         return new BankAccountSearchModel(criteriaList);
     }
+
+    public static BankAccountSearchModel returnModelWithBalanceMore() {
+        SearchCriteria criteria = new SearchCriteria();
+        criteria.setFieldName("balance");
+        criteria.setOperation(">");
+        criteria.setFieldValue(50000);
+
+        List<SearchCriteria> criteriaList = List.of(criteria);
+
+        BankAccountSearchModel model = new BankAccountSearchModel(criteriaList);
+        model.setSortColumn("balance");
+
+        return model;
+    }
+
+    public static BankAccountSearchModel returnModelWithWrongSortField() {
+        SearchCriteria criteria = new SearchCriteria();
+        criteria.setFieldName("balance");
+        criteria.setOperation(">");
+        criteria.setFieldValue(50000);
+
+        List<SearchCriteria> criteriaList = List.of(criteria);
+
+        BankAccountSearchModel model = new BankAccountSearchModel(criteriaList);
+        model.setSortColumn("amount");
+
+        return model;
+    }
+
+
+
+    public static BankAccountSearchModel returnModelWithBalanceMoreAndDESCSort() {
+        SearchCriteria criteria = new SearchCriteria();
+        criteria.setFieldName("balance");
+        criteria.setOperation(">");
+        criteria.setFieldValue(50000);
+
+        List<SearchCriteria> criteriaList = List.of(criteria);
+
+        BankAccountSearchModel model = new BankAccountSearchModel(criteriaList);
+        model.setSortColumn("-id");
+
+        return model;
+    }
 }

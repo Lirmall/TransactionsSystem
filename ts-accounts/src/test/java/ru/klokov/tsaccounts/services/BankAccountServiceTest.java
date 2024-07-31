@@ -2,6 +2,7 @@ package ru.klokov.tsaccounts.services;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.modelmapper.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -10,9 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tsaccounts.config.TestContainerConfExtension;
 import ru.klokov.tsaccounts.dtos.BankAccountDto;
 import ru.klokov.tsaccounts.exceptions.NoMatchingEntryInDatabaseException;
+import ru.klokov.tsaccounts.exceptions.VerificationException;
 import ru.klokov.tsaccounts.models.BankAccountModel;
 import ru.klokov.tsaccounts.specifications.bank_account.BankAccountSearchModel;
 import ru.klokov.tsaccounts.test_objects.BankAccountSearchModelReturner;
+import ru.klokov.tsaccounts.test_utils.FieldsSouter;
 
 import java.util.List;
 
@@ -62,5 +65,60 @@ class BankAccountServiceTest {
         Page<BankAccountDto> result = bankAccountService.findByFilterWithCriteria(modelWithOneId);
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void findByFilterWithCriteriaTest2() {
+        BankAccountSearchModel modelWithBalanceMore = BankAccountSearchModelReturner.returnModelWithBalanceMore();
+
+        Page<BankAccountDto> result = bankAccountService.findByFilterWithCriteria(modelWithBalanceMore);
+        assertNotNull(result);
+        assertEquals(2, result.getTotalElements());
+
+        BankAccountDto dto1 = result.getContent().get(0);
+        BankAccountDto dto2 = result.getContent().get(1);
+
+        assertEquals(1, dto1.getId());
+        assertEquals(1, dto1.getOwnerUserId());
+        assertEquals(100000.0, dto1.getBalance());
+        assertEquals(false, dto1.getBlocked());
+        assertEquals(false, dto1.getDeleted());
+
+        assertEquals(8, dto2.getId());
+        assertEquals(5, dto2.getOwnerUserId());
+        assertEquals(105000.0, dto2.getBalance());
+        assertEquals(false, dto2.getBlocked());
+        assertEquals(false, dto2.getDeleted());
+    }
+
+    @Test
+    void findByFilterWithCriteriaTest3() {
+        BankAccountSearchModel modelWithBalanceMoreAndDESCSort = BankAccountSearchModelReturner.returnModelWithBalanceMoreAndDESCSort();
+
+        Page<BankAccountDto> result = bankAccountService.findByFilterWithCriteria(modelWithBalanceMoreAndDESCSort);
+        assertNotNull(result);
+        assertEquals(2, result.getTotalElements());
+
+        BankAccountDto dto1 = result.getContent().get(0);
+        BankAccountDto dto2 = result.getContent().get(1);
+
+        assertEquals(8, dto1.getId());
+        assertEquals(5, dto1.getOwnerUserId());
+        assertEquals(105000.0, dto1.getBalance());
+        assertEquals(false, dto1.getBlocked());
+        assertEquals(false, dto1.getDeleted());
+
+        assertEquals(1, dto2.getId());
+        assertEquals(1, dto2.getOwnerUserId());
+        assertEquals(100000.0, dto2.getBalance());
+        assertEquals(false, dto2.getBlocked());
+        assertEquals(false, dto2.getDeleted());
+    }
+
+    @Test
+    void findByFilterWithCriteriaThrowValidExceptionTest() {
+        BankAccountSearchModel modelWithWrongSortField = BankAccountSearchModelReturner.returnModelWithWrongSortField();
+
+        assertThrows(VerificationException.class, () -> bankAccountService.findByFilterWithCriteria(modelWithWrongSortField));
     }
 }
