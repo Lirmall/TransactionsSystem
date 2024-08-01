@@ -38,10 +38,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!--        предоставляет основную функциональность Flyway-->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+        <!--        обеспечивает поддержку специфичных для PostgreSQL функций и возможностей-->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
@@ -52,11 +54,6 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -64,7 +61,80 @@
             <version>1.18.22</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <!--        Documentation and Swagger-->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+
+        <!--        For tests-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.17.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.12</version>
+        </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>local-dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <logback.loglevel>INFO</logback.loglevel>
+                <spring.profiles.active>local-dev${profile.with-skip-tests}</spring.profiles.active>
+                <server.port>8090</server.port>
+                <server.host>https://localhost</server.host>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>test</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <logback.loglevel>INFO</logback.loglevel>
+                <server.port>8090</server.port>
+                <server.host>https://localhost</server.host>
+            </properties>
+        </profile>
+
+        <!-- Профиль with-skip-tests предназначен для пропуска команды жизненного цикла test -->
+        <profile>
+            <id>with-skip-tests</id>
+            <properties>
+                <!-- Пропустить тест -->
+                <maven.test.skip>true</maven.test.skip>
+                <profile.with-skip-tests>,with-skip-tests</profile.with-skip-tests>
+            </properties>
+            <activation>
+                <property>
+                    <name>!with-tests</name>
+                </property>
+            </activation>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
