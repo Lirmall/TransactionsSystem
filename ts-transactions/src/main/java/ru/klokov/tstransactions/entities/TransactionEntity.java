@@ -17,7 +17,6 @@ import java.util.UUID;
 public class TransactionEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @UuidGenerator(style = UuidGenerator.Style.TIME)
     @Column(name = "id")
     private UUID id;

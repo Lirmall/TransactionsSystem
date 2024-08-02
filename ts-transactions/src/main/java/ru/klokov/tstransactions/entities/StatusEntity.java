@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "statuses")
 @Getter
@@ -23,4 +25,7 @@ public class StatusEntity {
 
     @Column(name = "name")
     private String name;
+
+    @OneToMany(mappedBy = "statusId", fetch = FetchType.LAZY)
+    private List<TransactionEntity> transactionEntityList;
 }

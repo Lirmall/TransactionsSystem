@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "types")
 @Getter
@@ -23,4 +25,7 @@ public class TypeEntity {
 
     @Column(name = "name")
     private String name;
+
+    @OneToMany(mappedBy = "typeId", fetch = FetchType.LAZY)
+    private List<TransactionEntity> transactionEntityList;
 }

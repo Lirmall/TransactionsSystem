@@ -5,6 +5,7 @@ import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.extension.TestWatcher;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.io.FileInputStream;
@@ -13,7 +14,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 @Slf4j
-public class TestContainerConfExtension {
+public class TestContainerConfExtension implements TestWatcher {
     //Здесь мы читаем настройки из скомпилированного application.properties
     static Properties properties = new Properties();
     static {
@@ -26,13 +27,13 @@ public class TestContainerConfExtension {
     }
 
     private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER = new PostgreSQLContainer<>("postgres:14.1")
-            .withDatabaseName(properties.getProperty("schema.name"))
+            .withDatabaseName(properties.getProperty("database.name"))
             .withUsername(properties.getProperty("spring.datasource.username"))
             .withPassword(properties.getProperty("spring.datasource.password"))
             .withCreateContainerCmdModifier(cmd -> {
-                // Пробрасываем порт 5432 контейнера на порт 5434 хоста
+                // Пробрасываем порт 5432 контейнера на порт 5435 хоста
                 Objects.requireNonNull(cmd.getHostConfig()).withPortBindings(
-                        new Ports(new PortBinding(Ports.Binding.bindPort(5434), new ExposedPort(5432)))
+                        new Ports(new PortBinding(Ports.Binding.bindPort(5435), new ExposedPort(5432)))
                 );
             });
 
