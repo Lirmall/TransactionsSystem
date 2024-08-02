@@ -27,7 +27,7 @@ public class TestContainerConfExtension implements TestWatcher {
     }
 
     private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER = new PostgreSQLContainer<>("postgres:14.1")
-            .withDatabaseName(properties.getProperty("schema.name"))
+            .withDatabaseName(properties.getProperty("database.name"))
             .withUsername(properties.getProperty("spring.datasource.username"))
             .withPassword(properties.getProperty("spring.datasource.password"))
             .withCreateContainerCmdModifier(cmd -> {
