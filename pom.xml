@@ -10,6 +10,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <modules>
+        <module>ts-common</module>
         <module>ts-accounts</module>
         <module>ts-reports</module>
         <module>ts-transactions</module>

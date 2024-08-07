@@ -30,6 +30,13 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
+
+        <dependency>
+            <groupId>ru.klokov</groupId>
+            <artifactId>common</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -37,11 +44,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <!--        предоставляет основную функциональность Flyway-->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
         </dependency>
         <!--        обеспечивает поддержку специфичных для PostgreSQL функций и возможностей-->
         <dependency>

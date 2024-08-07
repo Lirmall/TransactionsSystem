@@ -30,6 +30,13 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
+
+        <dependency>
+            <groupId>ru.klokov</groupId>
+            <artifactId>common</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -114,7 +121,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <logback.loglevel>INFO</logback.loglevel>
+                <logback.loglevel>DEBUG</logback.loglevel>
                 <server.port>8090</server.port>
                 <server.host>https://localhost</server.host>
             </properties>

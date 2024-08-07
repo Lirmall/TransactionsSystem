@@ -58,6 +58,13 @@ public class BankAccountService {
     }
 
     @Transactional(readOnly = true)
+    public Boolean verifyBankAccountById(Long id) {
+        Optional<BankAccountEntity> foundUser = bankAccountRepository.findById(id);
+
+        return foundUser.isPresent();
+    }
+
+    @Transactional(readOnly = true)
     public List<BankAccountModel> findBankAccountsByOwnerUser(Long ownerUserId) {
         List<BankAccountEntity> bankAccountEntities = bankAccountRepository.findBankAccountEntitiesByOwnerUserId(ownerUserId);
         return bankAccountEntities.stream().map(bankAccountMapper::convertEntityToModel).toList();
