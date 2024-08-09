@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>ru.klokov</groupId>
+        <artifactId>transactions-system</artifactId>
+        <version>1.0-SNAPSHOT</version>
+<!--        <relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
     </parent>
-    <groupId>ru.klokov</groupId>
+
     <artifactId>accounts</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>accounts</name>
@@ -45,7 +45,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!--        обеспечивает поддержку специфичных для PostgreSQL функций и возможностей-->
+        <!--        обеспечивает поддержку специфичных для PostgresSQL функций и возможностей-->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
@@ -60,21 +60,18 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
-            <version>3.0.0</version>
         </dependency>
 
         <!--        Documentation and Swagger-->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.5.0</version>
         </dependency>
 
         <!--        For tests-->
@@ -86,13 +83,11 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.17.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.12</version>
         </dependency>
     </dependencies>
 
