@@ -1,1 +1,0 @@
-create schema if not exists accounts_test;
