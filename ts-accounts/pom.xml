@@ -6,7 +6,6 @@
         <groupId>ru.klokov</groupId>
         <artifactId>transactions-system</artifactId>
         <version>1.0-SNAPSHOT</version>
-<!--        <relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
     </parent>
 
     <artifactId>accounts</artifactId>
