@@ -9,9 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tsaccounts.dtos.CreateAndUpdateUserDto;
 import ru.klokov.tsaccounts.dtos.UserDto;
 import ru.klokov.tsaccounts.entities.UserEntity;
-import ru.klokov.tsaccounts.exceptions.AlreadyCreatedException;
 import ru.klokov.tsaccounts.exceptions.NoMatchingEntryInDatabaseException;
-import ru.klokov.tsaccounts.exceptions.VerificationException;
 import ru.klokov.tsaccounts.mappers.UserEntityMapper;
 import ru.klokov.tsaccounts.models.UserModel;
 import ru.klokov.tsaccounts.repositories.UserRepository;
@@ -21,8 +19,6 @@ import ru.klokov.tsaccounts.specifications.user.UserSpecification;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -33,26 +29,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserBankAccountService userBankAccountService;
     private final UserSortChecker userSortChecker;
+    private final ValidationService validationService;
+    private final VerificationService verificationService;
 
     @Transactional
     public UserModel create(CreateAndUpdateUserDto userDto) {
-        log.debug("Verification user data");
-        Optional<UserEntity> foundUser = userRepository.findUserEntityByUsername(userDto.getUsername());
-
-        if(foundUser.isPresent()) {
-            log.error("Error with create user - User with username \"{}\" already exists in the system", userDto.getUsername());
-            throw new AlreadyCreatedException(String.format("User with username \"%s\" already exists in the system", userDto.getUsername()));
-        }
-
-        if(!this.emailVerification(userDto.getEmail())) {
-            log.error("Email verification error - \"{}\" - email does not meet requirements", userDto.getEmail());
-            throw new VerificationException(String.format("Email verification error - \"%s\" - email does not meet requirements", userDto.getEmail()));
-        }
-
-        if(!this.usernameVerification(userDto.getUsername())) {
-            log.error("Username verification error - \"{}\" - username does not meet requirements", userDto.getEmail());
-            throw new VerificationException(String.format("Username verification error - \"%s\" - username does not meet requirements", userDto.getEmail()));
-        }
+        this.checkUserData(userDto);
 
         log.debug("Verification success. Create user");
 
@@ -98,6 +80,8 @@ public class UserService {
 
     @Transactional
     public UserModel updateUserById(Long id, CreateAndUpdateUserDto newUserInfo) {
+        this.checkUserData(newUserInfo);
+
         log.debug("Try to find user with id {} in DB to update", id);
 
         UserEntity userToUpdate = userEntityMapper.convertModelToEntity(findById(id));
@@ -125,17 +109,11 @@ public class UserService {
         return userEntityMapper.convertEntityToDTO(userRepository.save(userToBlock));
     }
 
-    private boolean emailVerification(String email) {
-        String regex = "^[a-zA-Z0-9_\\-\\.]*@[a-zA-Z_\\-]*\\.[a-zA-Z]{2,}$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
-    }
-
-    private boolean usernameVerification(String username) {
-        String regex = "^[a-zA-Z0-9_\\-\\.]{5,}$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(username);
-        return matcher.matches();
+    private void checkUserData(CreateAndUpdateUserDto dto) {
+        log.debug("Check user data");
+        validationService.validateUsername(dto.getUsername());
+        verificationService.verifyUserEmail(dto.getEmail());
+        verificationService.verifyUsername(dto.getUsername());
+        log.debug("User data is correct");
     }
 }
