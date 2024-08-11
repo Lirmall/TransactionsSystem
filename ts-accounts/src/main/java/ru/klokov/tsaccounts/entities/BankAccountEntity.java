@@ -22,15 +22,15 @@ public class BankAccountEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "owner_user", insertable = false, updatable = false)
+    @Column(name = "owner_user", updatable = false)
     private Long ownerUserId;
 
     @Column(name = "balance")
     private Double balance;
 
     @Column(name = "blocked")
-    private Boolean blocked;
+    private boolean blocked;
 
     @Column(name = "deleted")
-    private Boolean deleted;
+    private boolean deleted;
 }

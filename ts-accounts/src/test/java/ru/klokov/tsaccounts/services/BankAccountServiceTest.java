@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tsaccounts.config.TestContainerConfExtension;
 import ru.klokov.tsaccounts.dtos.BankAccountDto;
+import ru.klokov.tsaccounts.entities.BankAccountEntity;
 import ru.klokov.tsaccounts.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tsaccounts.exceptions.VerificationException;
 import ru.klokov.tsaccounts.models.BankAccountModel;
@@ -31,7 +32,21 @@ class BankAccountServiceTest {
     @Test
     @Transactional
     void createTest() {
-        assertDoesNotThrow(() -> bankAccountService.create(1L));
+        Long ownerUserId = 7L;
+        List<BankAccountModel> ownerUserAccounts = bankAccountService.findBankAccountsByOwnerUser(ownerUserId);
+        assertEquals(2, ownerUserAccounts.size());
+
+        BankAccountModel result = bankAccountService.create(ownerUserId);
+        assertNotNull(result);
+
+        List<BankAccountModel> ownerUserAccountsAfterCreate = bankAccountService.findBankAccountsByOwnerUser(ownerUserId);
+        assertEquals(3, ownerUserAccountsAfterCreate.size());
+
+        assertNotNull(result.getId());
+        assertEquals(7L, result.getOwnerUserId());
+        assertEquals(0.0, result.getBalance());
+        assertFalse(result.getBlocked());
+        assertFalse(result.getDeleted());
     }
 
     @Test

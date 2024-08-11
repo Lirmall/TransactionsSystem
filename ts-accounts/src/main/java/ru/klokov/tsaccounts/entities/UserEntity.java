@@ -43,10 +43,10 @@ public class UserEntity {
     private String phoneNumber;
 
     @Column(name = "blocked")
-    private Boolean blocked;
+    private boolean blocked;
 
     @Column(name = "deleted")
-    private Boolean deleted;
+    private boolean deleted;
 
     @OneToMany(mappedBy = "ownerUserId", fetch = FetchType.LAZY)
     private List<BankAccountEntity> bankAccountsList;

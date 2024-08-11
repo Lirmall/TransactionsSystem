@@ -58,6 +58,8 @@ class UserServiceTest {
         assertEquals(CREATE_THIRD_NAME, createdUser.getThirdName());
         assertEquals(CREATE_EMAIL, createdUser.getEmail());
         assertEquals(CREATE_PHONE_NUMBER, createdUser.getPhoneNumber());
+        assertFalse(createdUser.getBlocked());
+        assertFalse(createdUser.getDeleted());
     }
 
     @Test
