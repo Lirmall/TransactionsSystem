@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.klokov.tsaccounts.dtos.CreateAndUpdateUserDto;
 import ru.klokov.tsaccounts.dtos.UserDto;
 import ru.klokov.tsaccounts.entities.UserEntity;
 import ru.klokov.tsaccounts.exceptions.NoMatchingEntryInDatabaseException;
@@ -33,18 +32,12 @@ public class UserService {
     private final VerificationService verificationService;
 
     @Transactional
-    public UserModel create(CreateAndUpdateUserDto userDto) {
+    public UserModel create(UserDto userDto) {
         this.checkUserData(userDto);
 
         log.debug("Verification success. Create user");
 
-        UserEntity userToSave = new UserEntity();
-        userToSave.setUsername(userDto.getUsername());
-        userToSave.setFirstName(userDto.getFirstName());
-        userToSave.setSecondName(userDto.getSecondName());
-        userToSave.setThirdName(userDto.getThirdName());
-        userToSave.setEmail(userDto.getEmail());
-        userToSave.setPhoneNumber(userDto.getPhoneNumber());
+        UserEntity userToSave = userEntityMapper.convertDtoToEntity(userDto);
 
         UserEntity userEntity = userRepository.save(userToSave);
 
@@ -79,7 +72,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel updateUserById(Long id, CreateAndUpdateUserDto newUserInfo) {
+    public UserModel updateUserById(Long id, UserDto newUserInfo) {
         this.checkUserData(newUserInfo);
 
         log.debug("Try to find user with id {} in DB to update", id);
@@ -109,7 +102,7 @@ public class UserService {
         return userEntityMapper.convertEntityToDTO(userRepository.save(userToBlock));
     }
 
-    private void checkUserData(CreateAndUpdateUserDto dto) {
+    private void checkUserData(UserDto dto) {
         log.debug("Check user data");
         validationService.validateUsername(dto.getUsername());
         verificationService.verifyUserEmail(dto.getEmail());

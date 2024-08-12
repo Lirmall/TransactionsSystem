@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tsaccounts.config.TestContainerConfExtension;
-import ru.klokov.tsaccounts.dtos.CreateAndUpdateUserDto;
+import ru.klokov.tsaccounts.dtos.UserDto;
 import ru.klokov.tsaccounts.exceptions.AlreadyCreatedException;
 import ru.klokov.tsaccounts.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tsaccounts.exceptions.VerificationException;
@@ -41,7 +41,7 @@ class UserServiceTest {
     @Test
     @Transactional
     void createTest() {
-        CreateAndUpdateUserDto userDto = new CreateAndUpdateUserDto();
+        UserDto userDto = new UserDto();
         userDto.setUsername(CREATE_USERNAME);
         userDto.setFirstName(CREATE_FIRST_NAME);
         userDto.setSecondName(CREATE_SECOND_NAME);
@@ -65,7 +65,7 @@ class UserServiceTest {
     @Test
     @Transactional
     void createAlreadyCreatedUser() {
-        CreateAndUpdateUserDto userDto = new CreateAndUpdateUserDto();
+        UserDto userDto = new UserDto();
         userDto.setUsername("testusername");
         userDto.setFirstName(CREATE_FIRST_NAME);
         userDto.setSecondName(CREATE_SECOND_NAME);
@@ -79,7 +79,7 @@ class UserServiceTest {
     @Test
     @Transactional
     void createWrongEmail() {
-        CreateAndUpdateUserDto userDto = new CreateAndUpdateUserDto();
+        UserDto userDto = new UserDto();
         userDto.setUsername(CREATE_USERNAME);
         userDto.setFirstName(CREATE_FIRST_NAME);
         userDto.setSecondName(CREATE_SECOND_NAME);
