@@ -1,5 +1,6 @@
 package ru.klokov.tsaccounts.specifications;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,8 +11,24 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SearchCriteria {
+
+    @Schema(description = "Наименование поля, по которому будет производиться поиск",
+            requiredMode = Schema.RequiredMode.REQUIRED,
+            example = "id")
     private String fieldName;
-    private String operation;
+
+    @Schema(description = "Операция поиска",
+            requiredMode = Schema.RequiredMode.REQUIRED,
+            example = "GREATER_THAN")
+    private SearchOperation searchOperation;
+
+    @Schema(description = "Значение поля, по которому производится поиск. Предпочтительно числовое",
+            requiredMode = Schema.RequiredMode.REQUIRED,
+            example = "10")
     private Object fieldValue;
+
+    @Schema(description = "Признак условия \"или\"",
+            requiredMode = Schema.RequiredMode.REQUIRED,
+            example = "false")
     private boolean orPredicate = false;
 }

@@ -1,6 +1,7 @@
 package ru.klokov.tsaccounts.test_objects;
 
 import ru.klokov.tsaccounts.specifications.SearchCriteria;
+import ru.klokov.tsaccounts.specifications.SearchOperation;
 import ru.klokov.tsaccounts.specifications.bank_account.BankAccountSearchModel;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public class BankAccountSearchModelReturner {
     public static BankAccountSearchModel returnModelWithOneId() {
         SearchCriteria criteria = new SearchCriteria();
         criteria.setFieldName("id");
-        criteria.setOperation(":");
+        criteria.setSearchOperation(SearchOperation.EQUALITY);
         criteria.setFieldValue(1);
 
         List<SearchCriteria> criteriaList = List.of(criteria);
@@ -20,7 +21,7 @@ public class BankAccountSearchModelReturner {
     public static BankAccountSearchModel returnModelWithBalanceMore() {
         SearchCriteria criteria = new SearchCriteria();
         criteria.setFieldName("balance");
-        criteria.setOperation(">");
+        criteria.setSearchOperation(SearchOperation.GREATER_THAN);
         criteria.setFieldValue(50000);
 
         List<SearchCriteria> criteriaList = List.of(criteria);
@@ -34,7 +35,7 @@ public class BankAccountSearchModelReturner {
     public static BankAccountSearchModel returnModelWithWrongSortField() {
         SearchCriteria criteria = new SearchCriteria();
         criteria.setFieldName("balance");
-        criteria.setOperation(">");
+        criteria.setSearchOperation(SearchOperation.GREATER_THAN);
         criteria.setFieldValue(50000);
 
         List<SearchCriteria> criteriaList = List.of(criteria);
@@ -45,12 +46,10 @@ public class BankAccountSearchModelReturner {
         return model;
     }
 
-
-
     public static BankAccountSearchModel returnModelWithBalanceMoreAndDESCSort() {
         SearchCriteria criteria = new SearchCriteria();
         criteria.setFieldName("balance");
-        criteria.setOperation(">");
+        criteria.setSearchOperation(SearchOperation.GREATER_THAN);
         criteria.setFieldValue(50000);
 
         List<SearchCriteria> criteriaList = List.of(criteria);
