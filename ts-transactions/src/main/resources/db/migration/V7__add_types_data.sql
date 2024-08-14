@@ -1,4 +1,4 @@
-insert into transactions.types ("name") values ('Payment');
-insert into transactions.types ("name") values ('Deposit');
-insert into transactions.types ("name") values ('Cash Withdrawal');
-insert into transactions.types ("name") values ('Transfer');
+insert into transactions.types (id, "name") values (1, 'Payment');
+insert into transactions.types (id, "name") values (2, 'Deposit');
+insert into transactions.types (id, "name") values (3, 'Cash Withdrawal');
+insert into transactions.types (id, "name") values (4, 'Transfer');

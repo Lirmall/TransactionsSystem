@@ -11,12 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import ru.klokov.tscommon.requests.VerificationRequest;
 import ru.klokov.tscommon.requests.VerificationResponse;
-import ru.klokov.tstransactions.dtos.CreateTransactionDto;
-import ru.klokov.tstransactions.entities.TransactionEntity;
+import ru.klokov.tstransactions.dtos.TransactionDto;
 import ru.klokov.tstransactions.exceptions.VerificationException;
 import ru.klokov.tstransactions.services.TransactionsService;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -35,20 +32,20 @@ public class TransactionController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping
-    public void create(@RequestBody CreateTransactionDto createTransactionDto) {
+    public void create(@RequestBody TransactionDto transactionDto) {
         log.debug("Verify sender id");
-        if(!this.verifyBankAccount(new VerificationRequest(createTransactionDto.getSenderId()))) {
-            throw new VerificationException(String.format("Sender account with id %s does not exist", createTransactionDto.getRecipientId()));
+        if(!this.verifyBankAccount(new VerificationRequest(transactionDto.getSenderId()))) {
+            throw new VerificationException(String.format("Sender account with id %s does not exist", transactionDto.getRecipientId()));
         }
         log.debug("Sender id is verified");
         log.debug("Verify recipient id");
-        if(!this.verifyBankAccount(new VerificationRequest(createTransactionDto.getRecipientId()))) {
-            throw new VerificationException(String.format("Recipient account with id %s does not exist", createTransactionDto.getRecipientId()));
+        if(!this.verifyBankAccount(new VerificationRequest(transactionDto.getRecipientId()))) {
+            throw new VerificationException(String.format("Recipient account with id %s does not exist", transactionDto.getRecipientId()));
         }
         log.debug("Recipient id is verified");
         log.info("All ids are verified");
 
-//        transactionsService.create(createTransactionDto);
+//        transactionsService.create(transactionDto);
     }
 
     @Operation(

@@ -13,32 +13,22 @@ public class UserEntityMapper {
     private final ModelMapper modelMapper;
 
     public UserDto convertModelToDTO(UserModel model) {
-        UserDto userDto = new UserDto();
-        modelMapper.map(model, userDto);
-        return userDto;
+        return modelMapper.map(model, UserDto.class);
     }
 
     public UserDto convertEntityToDTO(UserEntity entity) {
-        UserDto userDto = new UserDto();
-        modelMapper.map(entity, userDto);
-        return userDto;
+        return modelMapper.map(entity, UserDto.class);
     }
 
     public UserModel convertEntityToModel(UserEntity entity) {
-        UserModel userModel = new UserModel();
-        modelMapper.map(entity, userModel);
-        return userModel;
+        return modelMapper.map(entity, UserModel.class);
     }
 
     public UserEntity convertModelToEntity(UserModel model) {
-        UserEntity userEntity = new UserEntity();
-        modelMapper.map(model, userEntity);
-        return userEntity;
+        return modelMapper.map(model, UserEntity.class);
     }
 
     public UserEntity convertDtoToEntity(UserDto dto) {
-        UserEntity userEntity = new UserEntity();
-        modelMapper.map(dto, userEntity);
-        return userEntity;
+        return modelMapper.map(dto, UserEntity.class);
     }
 }
