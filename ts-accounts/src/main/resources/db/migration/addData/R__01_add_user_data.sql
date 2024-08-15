@@ -1,2 +1,0 @@
-INSERT INTO accounts.users (id, username, first_name, second_name, email, phone_number)
-VALUES (1, 'testusername', 'Test', 'Testov', 'test@example.com', '+1 (555) 123-4567') on conflict (id) do nothing;
