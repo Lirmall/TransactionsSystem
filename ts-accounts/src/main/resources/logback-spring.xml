@@ -3,9 +3,24 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} %highlight(%-5level) %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %highlight(%-5level) %logger{36} - %msg %n</pattern>
         </encoder>
     </appender>
+
+    <appender name="CONSOLE_Hibernate" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%-5level] [thread - %thread] %logger{36} - %msg%n
+            </pattern>>
+        </encoder>
+    </appender>
+
+    <logger name="org.hibernate.SQL" level="debug" additivity="false">
+        <appender-ref ref="CONSOLE_Hibernate"/>
+    </logger>
+    <logger name="org.hibernate.orm.jdbc.bind" level="trace" additivity="false">
+        <appender-ref ref="CONSOLE_Hibernate"/>
+    </logger>
 
     <root level="info">
         <appender-ref ref="CONSOLE"/>
