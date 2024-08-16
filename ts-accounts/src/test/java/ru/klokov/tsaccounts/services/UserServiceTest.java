@@ -49,7 +49,8 @@ class UserServiceTest {
         userDto.setEmail(CREATE_EMAIL);
         userDto.setPhoneNumber(CREATE_PHONE_NUMBER);
 
-        UserModel createdUser = userService.create(userDto);
+        UserModel userToCreate = userService.create(userDto);
+        UserModel createdUser = userService.findById(userToCreate.getId());
 
         assertNotNull(createdUser);
         assertEquals(CREATE_USERNAME, createdUser.getUsername());
