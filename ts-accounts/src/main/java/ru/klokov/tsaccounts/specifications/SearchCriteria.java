@@ -10,16 +10,17 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "Критерии условий поиска")
 public class SearchCriteria {
 
     @Schema(description = "Наименование поля, по которому будет производиться поиск",
             requiredMode = Schema.RequiredMode.REQUIRED,
-            example = "id")
+            example = "id",
+            allowableValues = {"id", "ownerUserId", "balance", "blocked", "deleted"})
     private String fieldName;
 
     @Schema(description = "Операция поиска",
-            requiredMode = Schema.RequiredMode.REQUIRED,
-            example = "GREATER_THAN")
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private SearchOperation searchOperation;
 
     @Schema(description = "Значение поля, по которому производится поиск. Предпочтительно числовое",

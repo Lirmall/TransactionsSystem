@@ -1,5 +1,6 @@
 package ru.klokov.tsaccounts.specifications;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,4 +14,9 @@ public enum SearchOperation {
     LIKE("~");
 
     private final String operation;
+
+    @JsonValue
+    public String getOperation() {
+        return operation;
+    }
 }
