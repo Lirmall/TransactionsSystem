@@ -42,7 +42,7 @@ class UserControllerTest {
                   "firstName": "Fromcontriller",
                   "thirdName": "Fromcontrollerovich",
                   "email": "test@controller.ru",
-                  "phoneNumber": "+1(888) 765-2528"
+                  "phoneNumber": "+1 (888) 765-2528"
                 }""";
 
             mockMvc.perform(post(URL_TEMPLATE)
@@ -61,7 +61,7 @@ class UserControllerTest {
                   "firstName": "Fromcontriller",
                   "thirdName": "Fromcontrollerovich",
                   "email": "test@controller.ru",
-                  "phoneNumber": "+1(888) 765-2528"
+                  "phoneNumber": "+1 (888) 765-2528"
                 }""";
 
             mockMvc.perform(post(URL_TEMPLATE)

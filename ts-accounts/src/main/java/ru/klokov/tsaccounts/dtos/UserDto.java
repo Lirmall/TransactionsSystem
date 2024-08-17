@@ -41,10 +41,10 @@ public class UserDto {
     private String phoneNumber;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @Schema(description = "Признак заблокированного пользователя", requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "false")
+    @Schema(description = "Признак заблокированного пользователя", defaultValue = "false")
     private Boolean blocked = false;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @Schema(description = "Признак удалённоно пользователя", requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "false")
+    @Schema(description = "Признак удалённоно пользователя", defaultValue = "false")
     private Boolean deleted = false;
 }

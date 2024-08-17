@@ -36,7 +36,7 @@ class UserServiceTest {
     private static final String CREATE_SECOND_NAME = "Fortestov";
     private static final String CREATE_THIRD_NAME = "Fortestovich";
     private static final String CREATE_EMAIL = "test@test.ru";
-    private static final String CREATE_PHONE_NUMBER = "+7(123)456789";
+    private static final String CREATE_PHONE_NUMBER = "+7 (123) 456-7890";
 
     @Test
     @Transactional

@@ -53,6 +53,10 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserModel findById(Long id) {
+        return this.privateFindById(id);
+    }
+
+    private UserModel privateFindById(Long id) {
         Optional<UserEntity> foundUser = userRepository.findById(id);
 
         if(foundUser.isPresent()) {
@@ -77,7 +81,7 @@ public class UserService {
 
         log.debug("Try to find user with id {} in DB to update", id);
 
-        UserEntity userToUpdate = userEntityMapper.convertModelToEntity(findById(id));
+        UserEntity userToUpdate = userEntityMapper.convertModelToEntity(privateFindById(id));
 
         userToUpdate.setUsername(newUserInfo.getUsername());
         userToUpdate.setFirstName(newUserInfo.getFirstName());
@@ -94,7 +98,7 @@ public class UserService {
     public UserDto blockUserById(Long id) {
         log.debug("Try to find user with id {} in DB", id);
 
-        UserEntity userToBlock = userEntityMapper.convertModelToEntity(findById(id));
+        UserEntity userToBlock = userEntityMapper.convertModelToEntity(privateFindById(id));
 
         userToBlock.setBlocked(true);
         userBankAccountService.blockBankAccountsByOwnerUserId(id);
@@ -107,6 +111,7 @@ public class UserService {
         validationService.validateUsername(dto.getUsername());
         verificationService.verifyUserEmail(dto.getEmail());
         verificationService.verifyUsername(dto.getUsername());
+        verificationService.verifyPhoneNumber(dto.getPhoneNumber());
         log.debug("User data is correct");
     }
 }
