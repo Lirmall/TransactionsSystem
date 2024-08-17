@@ -26,25 +26,25 @@ public class TransactionsService {
 
     @Transactional
     public TransactionEntity create(TransactionDto dto) {
-        this.verifyBankAccountData(dto);
+        verifyBankAccountData(dto);
 
         TransactionEntity entityToSave = transactionMapper.convertDtoToEntity(dto);
         entityToSave.setStatus(TransactionStatus.SUCCESS); //Временно. TODO Поправить в зависимости от стадии
         entityToSave.setTransactionDate(LocalDateTime.now());
 
-//        return transactionRepository.save(entityToSave);
-        return null;
+        return entityToSave;
+//        return transactionRepository.save(entityToSave); //Временно. TODO Раскомментировать после добавления функционала в модуль аккаунтов
     }
 
     private void verifyBankAccountData(TransactionDto transactionDto) {
         log.debug("Verify sender id");
-        if(!this.dataRepository.verifyBankAccount(transactionDto.getSenderId())) {
+        if(!dataRepository.verifyBankAccount(transactionDto.getSenderId())) {
             throw new VerificationException(String.format("Sender account with id %s does not exist", transactionDto.getRecipientId()));
         }
         log.debug("Sender id is verified");
 
         log.debug("Verify recipient id");
-        if(!this.dataRepository.verifyBankAccount(transactionDto.getRecipientId())) {
+        if(!dataRepository.verifyBankAccount(transactionDto.getRecipientId())) {
             throw new VerificationException(String.format("Recipient account with id %s does not exist", transactionDto.getRecipientId()));
         }
         log.debug("Recipient id is verified");
