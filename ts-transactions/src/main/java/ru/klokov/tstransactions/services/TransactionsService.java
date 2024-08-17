@@ -20,7 +20,7 @@ public class TransactionsService {
     @Transactional
     public TransactionEntity create(TransactionDto dto) {
         TransactionEntity entityToSave = transactionMapper.convertDtoToEntity(dto);
-        entityToSave.setStatusId(TransactionStatus.SUCCESS); //Временно. TODO Поправить в зависимости от стадии
+        entityToSave.setStatus(TransactionStatus.SUCCESS); //Временно. TODO Поправить в зависимости от стадии
         entityToSave.setTransactionDate(LocalDateTime.now());
 
         return transactionRepository.save(entityToSave);

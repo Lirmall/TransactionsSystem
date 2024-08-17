@@ -1,28 +1,34 @@
 package ru.klokov.tstransactions.mappers;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
+import ru.klokov.tstransactions.config.enum_converters.StringToStatusConverter;
+import ru.klokov.tstransactions.config.enum_converters.StringToTypeConverter;
+import ru.klokov.tstransactions.config.enum_converters.TransactionStatusToStringConverter;
+import ru.klokov.tstransactions.config.enum_converters.TransactionTypeToStringConverter;
 import ru.klokov.tstransactions.dtos.TransactionDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
-import ru.klokov.tstransactions.entities.enums.TransactionStatus;
-import ru.klokov.tstransactions.entities.enums.TransactionType;
 
 @Component
 @RequiredArgsConstructor
 public class TransactionMapper {
     private final ModelMapper modelMapper;
 
+    @PostConstruct
+    public void setUp() {
+        modelMapper.addConverter(new TransactionStatusToStringConverter());
+        modelMapper.addConverter(new TransactionTypeToStringConverter());
+        modelMapper.addConverter(new StringToStatusConverter());
+        modelMapper.addConverter(new StringToTypeConverter());
+    }
+
     public TransactionDto convertEntityToDto(TransactionEntity entity) {
-        TransactionDto dto = modelMapper.map(entity, TransactionDto.class);
-        dto.setStatus(entity.getStatusId().getName());
-        dto.setType(entity.getTypeId().getName());
-        return dto;
+        return modelMapper.map(entity, TransactionDto.class);
     }
 
     public TransactionEntity convertDtoToEntity(TransactionDto dto) {
-        TransactionEntity entity = modelMapper.map(dto, TransactionEntity.class);
-        entity.setTypeId(TransactionType.getByName(dto.getType()));
-        return entity;
+        return modelMapper.map(dto, TransactionEntity.class);
     }
 }

@@ -38,7 +38,7 @@ class TransactionsServiceTest {
         assertEquals(1L, result.getSenderId());
         assertEquals(2L, result.getRecipientId());
         assertEquals(100.0, result.getAmount());
-        assertEquals(TransactionStatus.SUCCESS, result.getStatusId());
-        assertEquals(TransactionType.TRANSFER, result.getTypeId());
+        assertEquals(TransactionStatus.SUCCESS, result.getStatus());
+        assertEquals(TransactionType.TRANSFER, result.getType());
     }
 }

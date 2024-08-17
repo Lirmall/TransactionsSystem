@@ -26,6 +26,6 @@ public class StatusEntity {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "statusId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "status", fetch = FetchType.LAZY)
     private List<TransactionEntity> transactionEntityList;
 }

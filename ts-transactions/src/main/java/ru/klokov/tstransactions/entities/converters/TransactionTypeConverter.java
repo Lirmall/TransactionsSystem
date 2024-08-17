@@ -1,4 +1,4 @@
-package ru.klokov.tstransactions.services.utils;
+package ru.klokov.tstransactions.entities.converters;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

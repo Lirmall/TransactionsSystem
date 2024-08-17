@@ -7,8 +7,8 @@ import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import ru.klokov.tstransactions.entities.enums.TransactionStatus;
 import ru.klokov.tstransactions.entities.enums.TransactionType;
-import ru.klokov.tstransactions.services.utils.TransactionStatusConverter;
-import ru.klokov.tstransactions.services.utils.TransactionTypeConverter;
+import ru.klokov.tstransactions.entities.converters.TransactionStatusConverter;
+import ru.klokov.tstransactions.entities.converters.TransactionTypeConverter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -36,11 +36,11 @@ public class TransactionEntity {
 
     @Convert(converter = TransactionTypeConverter.class)
     @Column(name = "type")
-    private TransactionType typeId;
+    private TransactionType type;
 
     @Convert(converter = TransactionStatusConverter.class)
     @Column(name = "status")
-    private TransactionStatus statusId;
+    private TransactionStatus status;
 
     @Column(name = "transaction_date")
     private LocalDateTime transactionDate;

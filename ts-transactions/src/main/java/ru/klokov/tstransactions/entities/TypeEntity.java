@@ -26,6 +26,6 @@ public class TypeEntity {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "typeId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "type", fetch = FetchType.LAZY)
     private List<TransactionEntity> transactionEntityList;
 }
