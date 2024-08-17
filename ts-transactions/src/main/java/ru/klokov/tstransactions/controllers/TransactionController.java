@@ -21,9 +21,6 @@ import ru.klokov.tstransactions.services.TransactionsService;
 @RequiredArgsConstructor
 public class TransactionController {
     private final TransactionsService transactionsService;
-    private final RestTemplate restTemplate;
-    private final String url = "http://localhost:8089/api/v1/common/bank_accounts/verifyId";
-
 
     @Operation(
             summary = "Create new transaction",
@@ -33,8 +30,6 @@ public class TransactionController {
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping
     public void create(@RequestBody TransactionDto transactionDto) {
-        transactionsService.verifyBankAccountData(transactionDto);
-
-//        transactionsService.create(transactionDto);
+        transactionsService.create(transactionDto);
     }
 }
