@@ -31,9 +31,9 @@ public class TestContainerConfExtension implements TestWatcher {
             .withUsername(properties.getProperty("spring.datasource.username"))
             .withPassword(properties.getProperty("spring.datasource.password"))
             .withCreateContainerCmdModifier(cmd -> {
-                // Пробрасываем порт 5432 контейнера на порт 5435 хоста
+                // Пробрасываем порт 5432 контейнера на порт 5535 хоста
                 Objects.requireNonNull(cmd.getHostConfig()).withPortBindings(
-                        new Ports(new PortBinding(Ports.Binding.bindPort(5435), new ExposedPort(5432)))
+                        new Ports(new PortBinding(Ports.Binding.bindPort(5535), new ExposedPort(5432)))
                 );
             });
 

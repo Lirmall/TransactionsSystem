@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS transactions_test.transactions
+CREATE TABLE IF NOT EXISTS transactions.transactions
 (
     id uuid NOT NULL default uuid_generate_v4(),
     sender_id bigint NOT NULL,
@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS transactions_test.transactions
     status bigint NOT NULL,
     transaction_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    FOREIGN KEY (type) REFERENCES transactions_test.types (id) ON DELETE NO ACTION,
-    FOREIGN KEY (status) REFERENCES transactions_test.statuses (id) ON DELETE NO ACTION
+    FOREIGN KEY (type) REFERENCES transactions.types (id) ON DELETE NO ACTION,
+    FOREIGN KEY (status) REFERENCES transactions.statuses (id) ON DELETE NO ACTION
     );

@@ -1,1 +1,1 @@
-create schema if not exists transactions_test;
+create schema if not exists transactions;

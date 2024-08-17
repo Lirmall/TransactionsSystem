@@ -33,29 +33,8 @@ public class TransactionController {
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping
     public void create(@RequestBody TransactionDto transactionDto) {
-        log.debug("Verify sender id");
-        if(!this.verifyBankAccount(new VerificationRequest(transactionDto.getSenderId()))) {
-            throw new VerificationException(String.format("Sender account with id %s does not exist", transactionDto.getRecipientId()));
-        }
-        log.debug("Sender id is verified");
-        log.debug("Verify recipient id");
-        if(!this.verifyBankAccount(new VerificationRequest(transactionDto.getRecipientId()))) {
-            throw new VerificationException(String.format("Recipient account with id %s does not exist", transactionDto.getRecipientId()));
-        }
-        log.debug("Recipient id is verified");
-        log.info("All ids are verified");
+        transactionsService.verifyBankAccountData(transactionDto);
 
 //        transactionsService.create(transactionDto);
-    }
-
-    @Operation(
-            summary = "Verify bank account id",
-            method = "post")
-    @ApiResponse(responseCode = "200", description = "Request successful")
-    @ApiResponse(responseCode = "400", description = "Bad request")
-    @ApiResponse(responseCode = "500", description = "Internal server error")
-    private boolean verifyBankAccount(VerificationRequest request) {
-        VerificationResponse response = restTemplate.postForObject(url, request, VerificationResponse.class);
-        return response != null && response.getIsValid();
     }
 }
