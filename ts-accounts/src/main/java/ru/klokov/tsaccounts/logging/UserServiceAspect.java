@@ -24,7 +24,7 @@ public class UserServiceAspect {
     @Before("callAtPublicMethods()")
     public void logMethodCall(JoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().getName();
-        log.info("Calling method: {}", methodName);
+        log.debug("Calling method: {}", methodName);
     }
 
     @AfterThrowing(pointcut = "callAtPublicMethods()", throwing = "ex")
