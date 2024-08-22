@@ -1,6 +1,7 @@
 package ru.klokov.tsaccounts.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,13 @@ import ru.klokov.tsaccounts.specifications.SearchCriteria;
 import ru.klokov.tsaccounts.specifications.bank_account.BankAccountSearchModel;
 import ru.klokov.tsaccounts.specifications.bank_account.BankAccountSpecificationBuilder;
 import ru.klokov.tsaccounts.specifications.sort.BankAccountSortChecker;
+import ru.klokov.tscommon.dtos.BankAccountBalanceVerificationDto;
+import ru.klokov.tscommon.dtos.TransactionDataDto;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BankAccountService {
@@ -34,7 +38,7 @@ public class BankAccountService {
     public BankAccountModel create(Long ownerUserId) {
         Optional<UserEntity> optionalUserEntity = userRepository.findById(ownerUserId);
 
-        if(optionalUserEntity.isEmpty()) {
+        if (optionalUserEntity.isEmpty()) {
             throw new NoMatchingEntryInDatabaseException(String.format("User with id %s is not found in the system, the account cannot be created", ownerUserId));
         }
 
@@ -48,20 +52,21 @@ public class BankAccountService {
 
     @Transactional(readOnly = true)
     public BankAccountModel findById(Long id) {
-        Optional<BankAccountEntity> foundUser = bankAccountRepository.findById(id);
-
-        if(foundUser.isPresent()) {
-            return bankAccountMapper.convertEntityToModel(foundUser.get());
-        } else {
-            throw new NoMatchingEntryInDatabaseException(String.format("Bank account wit id %s not found in database", id));
-        }
+        return bankAccountMapper.convertEntityToModel(privateFindById(id));
     }
 
     @Transactional(readOnly = true)
     public Boolean verifyBankAccountById(Long id) {
-        Optional<BankAccountEntity> foundUser = bankAccountRepository.findById(id);
+        Optional<BankAccountEntity> foundAccount = bankAccountRepository.findById(id);
 
-        return foundUser.isPresent();
+        return foundAccount.isPresent();
+    }
+
+    @Transactional(readOnly = true)
+    public Boolean verifyBankAccountBalanceById(BankAccountBalanceVerificationDto dto) {
+        BankAccountEntity foundUser = privateFindById(dto.getSenderId());
+
+        return (foundUser.getBalance() - dto.getAmount()) >= 0;
     }
 
     @Transactional(readOnly = true)
@@ -74,12 +79,50 @@ public class BankAccountService {
     public Page<BankAccountDto> findByFilterWithCriteria(BankAccountSearchModel model) {
         Pageable pageable = bankAccountSortChecker.getPageableAndSort(model);
 
-        if(!model.getCriteriaList().isEmpty()) {
+        if (!model.getCriteriaList().isEmpty()) {
             BankAccountSpecificationBuilder builder = new BankAccountSpecificationBuilder(model.getCriteriaList());
             Page<BankAccountEntity> entities = bankAccountRepository.findAll(builder.build(), pageable);
             return entities.map(bankAccountMapper::convertEntityToDTO);
         } else {
             return Page.empty();
         }
+    }
+
+    private BankAccountEntity privateFindById(Long id) {
+        Optional<BankAccountEntity> foundUser = bankAccountRepository.findById(id);
+
+        if (foundUser.isPresent()) {
+            return foundUser.get();
+        } else {
+            throw new NoMatchingEntryInDatabaseException(String.format("Bank account wit id %s not found in database", id));
+        }
+    }
+
+    public Boolean doTransaction(TransactionDataDto dto) {
+        BankAccountEntity senderAccount = privateFindById(dto.getSenderId());
+        BankAccountEntity recipientAccount = privateFindById(dto.getRecipientId());
+        Double amount = dto.getAmount();
+
+        Double newSenderBalance = senderAccount.getBalance() - amount;
+        Double newRecipientBalance = senderAccount.getBalance() + amount;
+
+        senderAccount.setBalance(newSenderBalance);
+        recipientAccount.setBalance(newRecipientBalance);
+
+        try {
+            bankAccountRepository.save(senderAccount);
+        } catch (Exception e) {
+            log.error("{}", e.getMessage());
+            return false;
+        }
+
+        try {
+            bankAccountRepository.save(recipientAccount);
+        } catch (Exception e) {
+            log.error("{}", e.getMessage());
+            return false;
+        }
+
+        return true;
     }
 }

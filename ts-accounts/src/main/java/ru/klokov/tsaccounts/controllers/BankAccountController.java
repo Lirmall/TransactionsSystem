@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.klokov.tsaccounts.dtos.BankAccountDto;
 import ru.klokov.tsaccounts.services.BankAccountService;
 import ru.klokov.tsaccounts.specifications.bank_account.BankAccountSearchModel;
+import ru.klokov.tscommon.requests.TransactionRequest;
+import ru.klokov.tscommon.requests.VerificationBalanceRequest;
 import ru.klokov.tscommon.requests.VerificationRequest;
 import ru.klokov.tscommon.requests.VerificationResponse;
 
@@ -31,6 +33,28 @@ public class BankAccountController {
     @PostMapping("/verifyId")
     public VerificationResponse verifyBankAccount(@RequestBody VerificationRequest request) {
         return new VerificationResponse(bankAccountService.verifyBankAccountById(request.getId()));
+    }
+
+    @Operation(
+            summary = "Verify bank account balance for transaction",
+            method = "post")
+    @ApiResponse(responseCode = "200", description = "Request successful")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @PostMapping("/verifyBalance")
+    public VerificationResponse verifyBalance(@RequestBody VerificationBalanceRequest request) {
+        return new VerificationResponse(bankAccountService.verifyBankAccountBalanceById(request.getData()));
+    }
+
+    @Operation(
+            summary = "Do transaction",
+            method = "post")
+    @ApiResponse(responseCode = "200", description = "Request successful")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @PostMapping("/transaction")
+    public VerificationResponse transaction(@RequestBody TransactionRequest request) {
+        return new VerificationResponse(bankAccountService.doTransaction(request.getData()));
     }
 
     @Operation(

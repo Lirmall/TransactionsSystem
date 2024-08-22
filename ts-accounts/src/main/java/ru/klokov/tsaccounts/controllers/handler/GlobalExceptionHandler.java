@@ -23,12 +23,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ExceptionDto> handleVerificationException(VerificationException ex) {
-        return this.buildResponseEntity(HttpStatus.CONFLICT, "VerificationException", ex.getMessage());
+        return this.buildResponseEntity(HttpStatus.BAD_REQUEST, "VerificationException", ex.getMessage());
     }
 
     @ExceptionHandler
     public ResponseEntity<ExceptionDto> handleValidationException(ValidationException ex) {
-        return this.buildResponseEntity(HttpStatus.CONFLICT, "ValidationException", ex.getMessage());
+        return this.buildResponseEntity(HttpStatus.BAD_REQUEST, "ValidationException", ex.getMessage());
     }
 
     @ExceptionHandler

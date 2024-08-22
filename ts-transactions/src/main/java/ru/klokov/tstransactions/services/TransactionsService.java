@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.klokov.tscommon.dtos.TransactionDataDto;
 import ru.klokov.tscommon.requests.VerificationRequest;
 import ru.klokov.tstransactions.dtos.TransactionDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
@@ -32,8 +33,10 @@ public class TransactionsService {
         entityToSave.setStatus(TransactionStatus.SUCCESS); //Временно. TODO Поправить в зависимости от стадии
         entityToSave.setTransactionDate(LocalDateTime.now());
 
-        return entityToSave;
-//        return transactionRepository.save(entityToSave); //Временно. TODO Раскомментировать после добавления функционала в модуль аккаунтов
+        dataRepository.doTransaction(new TransactionDataDto(dto.getSenderId(), dto.getRecipientId(), dto.getAmount()));
+
+//        return entityToSave;
+        return transactionRepository.save(entityToSave); //Временно. TODO Раскомментировать после добавления функционала в модуль аккаунтов
     }
 
     private void verifyBankAccountData(TransactionDto transactionDto) {
@@ -48,6 +51,15 @@ public class TransactionsService {
             throw new VerificationException(String.format("Recipient account with id %s does not exist", transactionDto.getRecipientId()));
         }
         log.debug("Recipient id is verified");
+
         log.info("All ids are verified");
+
+        log.debug("Verify transaction amount");
+        if(!dataRepository.checkBalanceForTransaction(transactionDto.getSenderId(), transactionDto.getAmount())) {
+            throw new VerificationException(String.format("Recipient account with id %s doesn't have enough funds on balance", transactionDto.getRecipientId()));
+        }
+        log.debug("Amount is verified");
+
+        log.info("All transaction's data is verified");
     }
 }

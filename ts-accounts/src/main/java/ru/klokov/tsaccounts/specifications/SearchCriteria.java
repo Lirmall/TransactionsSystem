@@ -15,8 +15,7 @@ public class SearchCriteria {
 
     @Schema(description = "Наименование поля, по которому будет производиться поиск",
             requiredMode = Schema.RequiredMode.REQUIRED,
-            example = "id",
-            allowableValues = {"id", "ownerUserId", "balance", "blocked", "deleted"})
+            example = "id")
     private String fieldName;
 
     @Schema(description = "Операция поиска",
