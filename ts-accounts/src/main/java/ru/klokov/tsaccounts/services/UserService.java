@@ -77,13 +77,26 @@ public class UserService {
 
     @Transactional
     public UserModel updateUserById(Long id, UserDto newUserInfo) {
-        this.checkUserData(newUserInfo);
+        verificationService.verifyUserEmail(newUserInfo.getEmail());
+        verificationService.verifyPhoneNumber(newUserInfo.getPhoneNumber());
+        verificationService.verifyFirstName(newUserInfo.getFirstName());
+        verificationService.verifySecondName(newUserInfo.getSecondName());
+        if(newUserInfo.getThirdName() != null) {
+            verificationService.verifyThirdName(newUserInfo.getThirdName());
+        }
 
         log.debug("Try to find user with id {} in DB to update", id);
 
         UserEntity userToUpdate = userEntityMapper.convertModelToEntity(privateFindById(id));
 
-        userToUpdate.setUsername(newUserInfo.getUsername());
+        String newUsername = newUserInfo.getUsername();
+
+        if(!newUsername.equals(userToUpdate.getUsername())) {
+            validationService.validateUsername(newUsername);
+            verificationService.verifyUsername(newUsername);
+            userToUpdate.setUsername(newUsername);
+        }
+
         userToUpdate.setFirstName(newUserInfo.getFirstName());
         userToUpdate.setSecondName(newUserInfo.getSecondName());
         userToUpdate.setThirdName(newUserInfo.getThirdName());
@@ -112,6 +125,11 @@ public class UserService {
         verificationService.verifyUserEmail(dto.getEmail());
         verificationService.verifyUsername(dto.getUsername());
         verificationService.verifyPhoneNumber(dto.getPhoneNumber());
+        verificationService.verifyFirstName(dto.getFirstName());
+        verificationService.verifySecondName(dto.getSecondName());
+        if(dto.getThirdName() != null) {
+            verificationService.verifyThirdName(dto.getThirdName());
+        }
         log.debug("User data is correct");
     }
 }

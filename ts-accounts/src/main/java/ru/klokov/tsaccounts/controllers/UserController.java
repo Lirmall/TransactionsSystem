@@ -4,11 +4,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ru.klokov.tsaccounts.dtos.UserDto;
 import ru.klokov.tsaccounts.mappers.UserEntityMapper;
 import ru.klokov.tsaccounts.models.UserModel;
 import ru.klokov.tsaccounts.services.UserService;
+import ru.klokov.tsaccounts.specifications.user.UserSearchModel;
 
 import java.util.List;
 
@@ -30,6 +32,30 @@ public class UserController {
     public List<UserDto> findAll() {
         List<UserModel> userModels = userService.findAll();
         return userModels.stream().map(userEntityMapper::convertModelToDTO).toList();
+    }
+
+    @Operation(
+            summary = "Get user by id",
+            method = "get")
+    @ApiResponse(responseCode = "200", description = "Request successful")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @GetMapping("/{id}")
+    public UserDto findById(@PathVariable("id") Long id) {
+        UserModel user = userService.findById(id);
+        return userEntityMapper.convertModelToDTO(user);
+    }
+
+    @Operation(
+            summary = "Find users by filter",
+            method = "post")
+    @ApiResponse(responseCode = "200", description = "Request successful")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @PostMapping("/filter")
+    public Page<UserDto> findByFilter(@RequestBody UserSearchModel model) {
+        Page<UserModel> modelsPage = userService.findByFilter(model);
+        return modelsPage.map(userEntityMapper::convertModelToDTO);
     }
 
     @Operation(

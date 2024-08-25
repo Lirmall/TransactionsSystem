@@ -14,6 +14,8 @@ public class VerificationService {
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_\\-\\.]*@[a-zA-Z_\\-]*\\.[a-zA-Z]{2,}$";
     private static final String USERNAME_REGEX = "^[a-zA-Z0-9_\\-\\.]{5,}$";
     private static final String PHONE_NUMBER_REGEX = "^\\+[0-9]{1}\\s\\([0-9]{3}\\)\\s[0-9]{3}\\-[0-9]{4}$";
+    private static final String NAME_REGEX = "^[A-Z][a-zA-Z]*(?:[-'][A-Z][a-zA-Z]*)*$";
+
     public void verifyUserEmail(String email) {
         if(!this.verifyByRegExp(EMAIL_REGEX, email)) {
             log.error("Email verification error - \"{}\" - email does not meet requirements", email);
@@ -28,6 +30,30 @@ public class VerificationService {
             throw new VerificationException(String.format("Username verification error - \"%s\" - username does not meet requirements", username));
         }
         log.debug("Success username \"{}\" verification", username);
+    }
+
+    public void verifyFirstName(String name) {
+        if(!this.verifyByRegExp(NAME_REGEX, name)) {
+            log.error("Name verification error - \"{}\" - name does not meet requirements", name);
+            throw new VerificationException(String.format("Name verification error - \"%s\" - name does not meet requirements", name));
+        }
+        log.debug("Success first name \"{}\" verification", name);
+    }
+
+    public void verifySecondName(String name) {
+        if(!this.verifyByRegExp(NAME_REGEX, name)) {
+            log.error("Second name verification error - \"{}\" - second name does not meet requirements", name);
+            throw new VerificationException(String.format("Second name verification error - \"%s\" - name does not meet requirements", name));
+        }
+        log.debug("Success second name \"{}\" verification", name);
+    }
+
+    public void verifyThirdName(String name) {
+        if(!this.verifyByRegExp(NAME_REGEX, name)) {
+            log.error("Third name verification error - \"{}\" - Third name does not meet requirements", name);
+            throw new VerificationException(String.format("Third name verification error - \"%s\" - name does not meet requirements", name));
+        }
+        log.debug("Success third name \"{}\" verification", name);
     }
 
     public void verifyPhoneNumber(String phoneNumber) {

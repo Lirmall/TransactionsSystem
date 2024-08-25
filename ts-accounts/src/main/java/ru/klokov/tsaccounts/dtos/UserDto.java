@@ -2,6 +2,7 @@ package ru.klokov.tsaccounts.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,7 @@ public class UserDto {
     @Schema(description = "Имя пользователя", requiredMode = Schema.RequiredMode.REQUIRED)
     private String firstName;
 
+    @Nullable
     @Schema(description = "Отчество пользователя (не обязательно)", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String thirdName;
 
