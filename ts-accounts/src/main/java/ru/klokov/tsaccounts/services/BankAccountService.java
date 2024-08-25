@@ -98,6 +98,7 @@ public class BankAccountService {
         }
     }
 
+    @Transactional
     public Boolean doTransaction(TransactionDataDto dto) {
         BankAccountEntity senderAccount = privateFindById(dto.getSenderId());
         BankAccountEntity recipientAccount = privateFindById(dto.getRecipientId());
