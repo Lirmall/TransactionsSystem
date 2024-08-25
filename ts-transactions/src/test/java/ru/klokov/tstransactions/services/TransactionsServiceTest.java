@@ -22,6 +22,7 @@ import ru.klokov.tstransactions.repositories.DataRepository;
 import ru.klokov.tstransactions.repositories.TransactionRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 
 @SpringBootTest
@@ -56,6 +57,7 @@ class TransactionsServiceTest {
         dto.setType("Transfer");
 
         Mockito.when(dataRepository.verifyBankAccount(anyLong())).thenReturn(true);
+        Mockito.when(dataRepository.checkBalanceForTransaction(anyLong(), anyDouble())).thenReturn(true);
 
         TransactionEntity result = transactionsService.create(dto);
         assertNotNull(result);
