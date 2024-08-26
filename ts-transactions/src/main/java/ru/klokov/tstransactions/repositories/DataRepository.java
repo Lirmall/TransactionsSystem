@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
 import ru.klokov.tscommon.dtos.BankAccountBalanceVerificationDto;
 import ru.klokov.tscommon.dtos.TransactionDataDto;
+import ru.klokov.tscommon.requests.TransactionRequest;
 import ru.klokov.tscommon.requests.VerificationBalanceRequest;
 import ru.klokov.tscommon.requests.VerificationResponse;
 
@@ -32,7 +33,8 @@ public class DataRepository {
     }
 
     public Boolean doTransaction(TransactionDataDto dto) {
-        VerificationResponse response = restTemplate.postForObject(URL + "/transaction", dto, VerificationResponse.class);
+        VerificationResponse response = restTemplate.postForObject(URL + "/transaction",
+                new TransactionRequest(dto), VerificationResponse.class);
         return response != null && response.getIsValid();
     }
 }

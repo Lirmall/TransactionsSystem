@@ -105,7 +105,7 @@ public class BankAccountService {
         Double amount = dto.getAmount();
 
         Double newSenderBalance = senderAccount.getBalance() - amount;
-        Double newRecipientBalance = senderAccount.getBalance() + amount;
+        Double newRecipientBalance = recipientAccount.getBalance() + amount;
 
         senderAccount.setBalance(newSenderBalance);
         recipientAccount.setBalance(newRecipientBalance);
