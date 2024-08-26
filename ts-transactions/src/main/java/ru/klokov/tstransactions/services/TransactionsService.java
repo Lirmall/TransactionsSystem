@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tscommon.dtos.TransactionDataDto;
-import ru.klokov.tscommon.requests.VerificationRequest;
 import ru.klokov.tstransactions.dtos.TransactionDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
 import ru.klokov.tstransactions.entities.enums.TransactionStatus;
