@@ -10,6 +10,7 @@ import ru.klokov.tstransactions.config.enum_converters.TransactionStatusToString
 import ru.klokov.tstransactions.config.enum_converters.TransactionTypeToStringConverter;
 import ru.klokov.tstransactions.dtos.TransactionDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
+import ru.klokov.tstransactions.models.TransactionModel;
 
 @Component
 @RequiredArgsConstructor
@@ -30,5 +31,21 @@ public class TransactionMapper {
 
     public TransactionEntity convertDtoToEntity(TransactionDto dto) {
         return modelMapper.map(dto, TransactionEntity.class);
+    }
+
+    public TransactionModel convertDtoToModel(TransactionDto dto) {
+        return modelMapper.map(dto, TransactionModel.class);
+    }
+
+    public TransactionModel convertEntityToModel(TransactionEntity entity) {
+        return modelMapper.map(entity, TransactionModel.class);
+    }
+
+    public TransactionDto convertModelToDto(TransactionModel model) {
+        return modelMapper.map(model, TransactionDto.class);
+    }
+
+    public TransactionEntity convertModelToEntity(TransactionModel model) {
+        return modelMapper.map(model, TransactionEntity.class);
     }
 }

@@ -13,6 +13,7 @@ import ru.klokov.tscommon.requests.VerificationRequest;
 import ru.klokov.tscommon.requests.VerificationResponse;
 import ru.klokov.tstransactions.dtos.TransactionDto;
 import ru.klokov.tstransactions.exceptions.VerificationException;
+import ru.klokov.tstransactions.mappers.TransactionMapper;
 import ru.klokov.tstransactions.services.TransactionsService;
 
 @Slf4j
@@ -21,6 +22,7 @@ import ru.klokov.tstransactions.services.TransactionsService;
 @RequiredArgsConstructor
 public class TransactionController {
     private final TransactionsService transactionsService;
+    private final TransactionMapper transactionMapper;
 
     @Operation(
             summary = "Create new transaction",
@@ -29,7 +31,7 @@ public class TransactionController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping
-    public void create(@RequestBody TransactionDto transactionDto) {
-        transactionsService.create(transactionDto);
+    public TransactionDto create(@RequestBody TransactionDto transactionDto) {
+        return transactionMapper.convertModelToDto(transactionsService.create(transactionDto));
     }
 }

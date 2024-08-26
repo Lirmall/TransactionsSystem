@@ -9,13 +9,17 @@ import ru.klokov.tscommon.requests.VerificationRequest;
 import ru.klokov.tstransactions.dtos.TransactionDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
 import ru.klokov.tstransactions.entities.enums.TransactionStatus;
+import ru.klokov.tstransactions.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tstransactions.exceptions.TransactionFailedException;
 import ru.klokov.tstransactions.exceptions.VerificationException;
 import ru.klokov.tstransactions.mappers.TransactionMapper;
+import ru.klokov.tstransactions.models.TransactionModel;
 import ru.klokov.tstransactions.repositories.DataRepository;
 import ru.klokov.tstransactions.repositories.TransactionRepository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -27,7 +31,7 @@ public class TransactionsService {
     private final TransactionMapper transactionMapper;
 
     @Transactional
-    public TransactionEntity create(TransactionDto dto) {
+    public TransactionModel create(TransactionDto dto) {
         verifyBankAccountData(dto);
 
         TransactionEntity entityToSave = transactionMapper.convertDtoToEntity(dto);
@@ -36,10 +40,24 @@ public class TransactionsService {
 
         boolean successful = dataRepository.doTransaction(new TransactionDataDto(dto.getSenderId(), dto.getRecipientId(), dto.getAmount()));
         if (successful) {
-            return transactionRepository.save(entityToSave);
+            return transactionMapper.convertEntityToModel(transactionRepository.save(entityToSave));
         } else {
             log.error("Transaction between bank account {} and bank account id {} failed", dto.getSenderId(), dto.getRecipientId());
             throw new TransactionFailedException(String.format("Transaction between bank account %s and bank account id %s failed", dto.getSenderId(), dto.getRecipientId()));
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public TransactionModel findById(UUID id) {
+        return transactionMapper.convertEntityToModel(privateFindById(id));
+    }
+
+    private TransactionEntity privateFindById(UUID id) {
+        Optional<TransactionEntity> foundTransaction = transactionRepository.findById(id);
+        if(foundTransaction.isPresent()) {
+            return foundTransaction.get();
+        } else {
+            throw new NoMatchingEntryInDatabaseException("Transaction with these parameters not found");
         }
     }
 
