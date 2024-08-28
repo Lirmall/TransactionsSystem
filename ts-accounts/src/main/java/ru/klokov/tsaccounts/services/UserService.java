@@ -75,6 +75,11 @@ public class UserService {
         return userEntities.map(userEntityMapper::convertEntityToModel);
     }
 
+    @Transactional(readOnly = true)
+    public UserModel findUserByBankAccountId(Long bankAccountId) {
+        return userEntityMapper.convertEntityToModel(userBankAccountService.findUserByBankAccountId(bankAccountId));
+    }
+
     @Transactional
     public UserModel updateUserById(Long id, UserDto newUserInfo) {
         verificationService.verifyUserEmail(newUserInfo.getEmail());
