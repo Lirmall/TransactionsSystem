@@ -26,6 +26,9 @@ public class ReportEntity {
     @Column(name = "sender_user_id")
     private Long senderUserId;
 
+    @Column(name = "sender_user_username")
+    private String senderUserUsername;
+
     @Column(name = "sender_bank_account_id")
     private Long senderUserBankAccountId;
 
@@ -34,6 +37,9 @@ public class ReportEntity {
 
     @Column(name = "recipient_user_id")
     private Long recipientUserId;
+
+    @Column(name = "recipient_user_username")
+    private String recipientUserUsername;
 
     @Column(name = "recipient_bank_account_id")
     private Long recipientUserBankAccountId;
