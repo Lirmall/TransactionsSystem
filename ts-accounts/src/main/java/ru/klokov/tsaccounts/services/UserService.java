@@ -15,9 +15,13 @@ import ru.klokov.tsaccounts.repositories.UserRepository;
 import ru.klokov.tsaccounts.specifications.sort.UserSortChecker;
 import ru.klokov.tsaccounts.specifications.user.UserSearchModel;
 import ru.klokov.tsaccounts.specifications.user.UserSpecification;
+import ru.klokov.tscommon.dtos.UserSimpleDataDto;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -59,7 +63,7 @@ public class UserService {
     private UserModel privateFindById(Long id) {
         Optional<UserEntity> foundUser = userRepository.findById(id);
 
-        if(foundUser.isPresent()) {
+        if (foundUser.isPresent()) {
             log.info("User successful found");
             return userEntityMapper.convertEntityToModel(foundUser.get());
         } else {
@@ -77,7 +81,19 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserModel findUserByBankAccountId(Long bankAccountId) {
+        return privateFindUserByBankAccountId(bankAccountId);
+    }
+
+    private UserModel privateFindUserByBankAccountId(Long bankAccountId) {
         return userEntityMapper.convertEntityToModel(userBankAccountService.findUserByBankAccountId(bankAccountId));
+    }
+
+    @Transactional(readOnly = true)
+    public Set<UserSimpleDataDto> findUsersByBankAccountIdsList(Collection<Long> bankAccountIds) {
+        Set<UserModel> foundUserModels = bankAccountIds.stream().map(this::privateFindUserByBankAccountId).collect(Collectors.toSet());
+        return foundUserModels.stream().map(model ->
+                        userEntityMapper.convertModelToSimpleDataDto(model, userBankAccountService.findBankAccountIdsByOwnerUserId(model.getId())))
+                .collect(Collectors.toSet());
     }
 
     @Transactional
@@ -86,7 +102,7 @@ public class UserService {
         verificationService.verifyPhoneNumber(newUserInfo.getPhoneNumber());
         verificationService.verifyFirstName(newUserInfo.getFirstName());
         verificationService.verifySecondName(newUserInfo.getSecondName());
-        if(newUserInfo.getThirdName() != null) {
+        if (newUserInfo.getThirdName() != null) {
             verificationService.verifyThirdName(newUserInfo.getThirdName());
         }
 
@@ -96,7 +112,7 @@ public class UserService {
 
         String newUsername = newUserInfo.getUsername();
 
-        if(!newUsername.equals(userToUpdate.getUsername())) {
+        if (!newUsername.equals(userToUpdate.getUsername())) {
             validationService.validateUsername(newUsername);
             verificationService.verifyUsername(newUsername);
             userToUpdate.setUsername(newUsername);
@@ -132,7 +148,7 @@ public class UserService {
         verificationService.verifyPhoneNumber(dto.getPhoneNumber());
         verificationService.verifyFirstName(dto.getFirstName());
         verificationService.verifySecondName(dto.getSecondName());
-        if(dto.getThirdName() != null) {
+        if (dto.getThirdName() != null) {
             verificationService.verifyThirdName(dto.getThirdName());
         }
         log.debug("User data is correct");

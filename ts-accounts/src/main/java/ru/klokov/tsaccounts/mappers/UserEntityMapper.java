@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 import ru.klokov.tsaccounts.dtos.UserDto;
 import ru.klokov.tsaccounts.entities.UserEntity;
 import ru.klokov.tsaccounts.models.UserModel;
+import ru.klokov.tscommon.dtos.UserSimpleDataDto;
+
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -30,5 +33,13 @@ public class UserEntityMapper {
 
     public UserEntity convertDtoToEntity(UserDto dto) {
         return modelMapper.map(dto, UserEntity.class);
+    }
+
+    public UserSimpleDataDto convertModelToSimpleDataDto(UserModel model, Set<Long> bankAccountIds) {
+        UserSimpleDataDto dto = new UserSimpleDataDto();
+        dto.setUsername(model.getUsername());
+        dto.setUserId(model.getId());
+        dto.setBankAccountIds(bankAccountIds);
+        return dto;
     }
 }

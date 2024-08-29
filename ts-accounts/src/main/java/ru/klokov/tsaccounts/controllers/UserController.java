@@ -11,8 +11,11 @@ import ru.klokov.tsaccounts.mappers.UserEntityMapper;
 import ru.klokov.tsaccounts.models.UserModel;
 import ru.klokov.tsaccounts.services.UserService;
 import ru.klokov.tsaccounts.specifications.user.UserSearchModel;
+import ru.klokov.tscommon.dtos.UserSimpleDataDto;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -44,6 +47,17 @@ public class UserController {
     public UserDto findById(@PathVariable("id") Long id) {
         UserModel user = userService.findById(id);
         return userEntityMapper.convertModelToDTO(user);
+    }
+
+    @Operation(
+            summary = "Get user by id",
+            method = "get")
+    @ApiResponse(responseCode = "200", description = "Request successful")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @GetMapping("/findByBankAccountIds")
+    public Set<UserSimpleDataDto> findById(@RequestBody Collection<Long> bankAccountIds) {
+        return userService.findUsersByBankAccountIdsList(bankAccountIds);
     }
 
     @Operation(

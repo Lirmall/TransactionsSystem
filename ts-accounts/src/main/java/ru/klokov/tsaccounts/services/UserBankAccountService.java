@@ -12,6 +12,7 @@ import ru.klokov.tsaccounts.repositories.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -27,6 +28,11 @@ public class UserBankAccountService {
             bae.setBlocked(true);
             bankAccountRepository.save(bae);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Long> findBankAccountIdsByOwnerUserId(Long ownerUserId) {
+        return bankAccountRepository.findBankAccountIdsByOwnerUserId(ownerUserId);
     }
 
     @Transactional(readOnly = true)
