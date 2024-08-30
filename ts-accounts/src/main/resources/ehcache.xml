@@ -14,4 +14,7 @@
 
     <cache alias="ru.klokov.tsaccounts.entities.UserEntity"
            uses-template="default"/>
+
+    <cache alias="ru.klokov.tsaccounts.entities.BankAccountEntity"
+           uses-template="default"/>
 </config>

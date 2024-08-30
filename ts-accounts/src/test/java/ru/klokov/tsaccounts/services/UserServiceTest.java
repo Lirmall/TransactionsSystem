@@ -16,8 +16,11 @@ import ru.klokov.tsaccounts.exceptions.VerificationException;
 import ru.klokov.tsaccounts.models.UserModel;
 import ru.klokov.tsaccounts.specifications.user.UserSearchModel;
 import ru.klokov.tsaccounts.test_objects.UserSearchModelReturner;
+import ru.klokov.tscommon.dtos.UserSimpleDataDto;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -228,5 +231,56 @@ class UserServiceTest {
         UserSearchModel model = UserSearchModelReturner.returnModelWithWrongSortField();
 
         assertThrows(VerificationException.class, () -> userService.findByFilter(model));
+    }
+
+    @Test
+    void findUserByBankAccountIdTest() {
+        UserModel result = userService.findUserByBankAccountId(5L);
+
+        assertNotNull(result);
+
+        assertEquals(4, result.getId());
+        assertEquals("deleteduser", result.getUsername());
+        assertEquals("Delov", result.getSecondName());
+        assertEquals("Del", result.getFirstName());
+        assertEquals("Delovich", result.getThirdName());
+        assertEquals("deleted@example.com", result.getEmail());
+        assertEquals("+2 (444) 456-7890", result.getPhoneNumber());
+        assertEquals(false, result.getBlocked());
+        assertEquals(true, result.getDeleted());
+
+        Long nonExistingBankAccountId = 1000000000000000000L;
+
+        assertThrows(NoMatchingEntryInDatabaseException.class, () -> userService.findUserByBankAccountId(nonExistingBankAccountId));
+    }
+
+    @Test
+    void findUsersByBankAccountIdsListTest() {
+        List<Long> ids = List.of(1L, 5L, 4L, 4L, 6L, 7L, 8L);
+
+        Set<UserSimpleDataDto> result = userService.findUsersByBankAccountIdsList(ids);
+
+        assertFalse(result.isEmpty());
+
+        assertEquals(4, result.size());
+
+        List<UserSimpleDataDto> resultList = new java.util.ArrayList<>(result.stream().toList());
+        resultList.sort(Comparator.comparing(UserSimpleDataDto::getUserId));
+
+        assertEquals(1, resultList.get(0).getUserId());
+        assertEquals("testusername", resultList.get(0).getUsername());
+        assertTrue(resultList.get(0).getBankAccountIds().containsAll(List.of(1L)) && List.of(1L).containsAll(resultList.get(0).getBankAccountIds()));
+
+        assertEquals(3, resultList.get(1).getUserId());
+        assertEquals("blockeduser", resultList.get(1).getUsername());
+        assertTrue(resultList.get(1).getBankAccountIds().containsAll(List.of(4L)) && List.of(4L).containsAll(resultList.get(1).getBankAccountIds()));
+
+        assertEquals(4, resultList.get(2).getUserId());
+        assertEquals("deleteduser", resultList.get(2).getUsername());
+        assertTrue(resultList.get(2).getBankAccountIds().containsAll(List.of(5L)) && List.of(5L).containsAll(resultList.get(2).getBankAccountIds()));
+
+        assertEquals(5, resultList.get(3).getUserId());
+        assertEquals("threeaccsuser", resultList.get(3).getUsername());
+        assertTrue(resultList.get(3).getBankAccountIds().containsAll(List.of(6L, 7L, 8L)) && List.of(6L, 7L, 8L).containsAll(resultList.get(3).getBankAccountIds()));
     }
 }

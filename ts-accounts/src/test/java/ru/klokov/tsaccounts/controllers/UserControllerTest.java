@@ -77,7 +77,7 @@ class UserControllerTest {
     void updateTest() throws Exception {
         String body = """
                 {
-                  "username": "forupdateuser",
+                  "username": "updatedfromcontrolleruser",
                   "secondName": "Updatefromcontrollerov",
                   "firstName": "Updatefromcontroller",
                   "thirdName": "Updatefromcontrollerovich",
