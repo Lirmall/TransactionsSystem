@@ -59,7 +59,13 @@ public class BankAccountService {
     public Boolean verifyBankAccountById(Long id) {
         Optional<BankAccountEntity> foundAccount = bankAccountRepository.findById(id);
 
-        return foundAccount.isPresent();
+        if(foundAccount.isEmpty()) {
+            return false;
+        }
+
+        BankAccountEntity result = foundAccount.get();
+
+        return !result.isBlocked() && !result.isDeleted();
     }
 
     @Transactional(readOnly = true)

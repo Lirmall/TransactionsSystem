@@ -14,6 +14,8 @@ import ru.klokov.tsaccounts.exceptions.VerificationException;
 import ru.klokov.tsaccounts.models.BankAccountModel;
 import ru.klokov.tsaccounts.specifications.bank_account.BankAccountSearchModel;
 import ru.klokov.tsaccounts.test_objects.BankAccountSearchModelReturner;
+import ru.klokov.tscommon.dtos.BankAccountBalanceVerificationDto;
+import ru.klokov.tscommon.dtos.TransactionDataDto;
 
 import java.util.List;
 
@@ -59,6 +61,22 @@ class BankAccountServiceTest {
     void findByIdTest() {
         assertDoesNotThrow(() -> bankAccountService.findById(1L));
         assertThrows(NoMatchingEntryInDatabaseException.class, () -> bankAccountService.findById(10000L));
+    }
+
+
+    @Test
+    void verifyBankAccountByIdTes() {
+        assertTrue(() -> bankAccountService.verifyBankAccountById(1L));
+        assertFalse(() -> bankAccountService.verifyBankAccountById(1000000000000000000L));
+        assertFalse(() -> bankAccountService.verifyBankAccountById(4L));
+        assertFalse(() -> bankAccountService.verifyBankAccountById(5L));
+    }
+
+    @Test
+    void verifyBankAccountBalanceByIdTest() {
+        assertTrue(() -> bankAccountService.verifyBankAccountBalanceById(new BankAccountBalanceVerificationDto(2L, 100.0)));
+        assertFalse(() -> bankAccountService.verifyBankAccountBalanceById(new BankAccountBalanceVerificationDto(10L, 100.0)));
+
     }
 
     @Test
@@ -132,5 +150,28 @@ class BankAccountServiceTest {
         BankAccountSearchModel modelWithWrongSortField = BankAccountSearchModelReturner.returnModelWithWrongSortField();
 
         assertThrows(VerificationException.class, () -> bankAccountService.findByFilterWithCriteria(modelWithWrongSortField));
+    }
+
+    @Transactional
+    @Test
+    void doTransactionTest() {
+        Long senderId = 3L;
+        Long recipientId = 11L;
+
+        TransactionDataDto dto = new TransactionDataDto(senderId, recipientId, 200.0);
+
+        BankAccountModel senderBeforeSend = bankAccountService.findById(senderId);
+        BankAccountModel recipientBeforeSend = bankAccountService.findById(recipientId);
+
+        assertEquals(12000.0, senderBeforeSend.getBalance());
+        assertEquals(1220.0, recipientBeforeSend.getBalance());
+
+        bankAccountService.doTransaction(dto);
+
+        BankAccountModel senderAfterSend = bankAccountService.findById(senderId);
+        BankAccountModel recipientAfterSend = bankAccountService.findById(recipientId);
+
+        assertEquals(11800.0, senderAfterSend.getBalance());
+        assertEquals(1420.0, recipientAfterSend.getBalance());
     }
 }
