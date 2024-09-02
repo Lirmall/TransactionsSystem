@@ -1,4 +1,4 @@
-package ru.klokov.tstransactions.specifications;
+package ru.klokov.tscommon.specifications;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

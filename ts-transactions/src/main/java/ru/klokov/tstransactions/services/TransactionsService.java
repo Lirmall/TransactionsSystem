@@ -2,19 +2,21 @@ package ru.klokov.tstransactions.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tscommon.dtos.TransactionDataDto;
+import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
+import ru.klokov.tscommon.exceptions.VerificationException;
 import ru.klokov.tstransactions.dtos.TransactionDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
 import ru.klokov.tstransactions.entities.enums.TransactionStatus;
-import ru.klokov.tstransactions.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tstransactions.exceptions.TransactionFailedException;
-import ru.klokov.tstransactions.exceptions.VerificationException;
 import ru.klokov.tstransactions.mappers.TransactionMapper;
 import ru.klokov.tstransactions.models.TransactionModel;
 import ru.klokov.tstransactions.repositories.DataRepository;
 import ru.klokov.tstransactions.repositories.TransactionRepository;
+import ru.klokov.tstransactions.specifications.TransactionSearchModel;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -53,11 +55,16 @@ public class TransactionsService {
 
     private TransactionEntity privateFindById(UUID id) {
         Optional<TransactionEntity> foundTransaction = transactionRepository.findById(id);
-        if(foundTransaction.isPresent()) {
+        if (foundTransaction.isPresent()) {
             return foundTransaction.get();
         } else {
             throw new NoMatchingEntryInDatabaseException("Transaction with these parameters not found");
         }
+    }
+
+    @Transactional
+    public Page<TransactionDto> findByFilterWithCriteria(TransactionSearchModel searchModel) {
+        return null;
     }
 
     private void verifyBankAccountData(TransactionDto transactionDto) {

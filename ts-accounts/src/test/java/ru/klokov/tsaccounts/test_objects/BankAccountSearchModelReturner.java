@@ -1,7 +1,7 @@
 package ru.klokov.tsaccounts.test_objects;
 
-import ru.klokov.tsaccounts.specifications.SearchCriteria;
-import ru.klokov.tsaccounts.specifications.SearchOperation;
+import ru.klokov.tscommon.specifications.SearchCriteria;
+import ru.klokov.tscommon.specifications.SearchOperation;
 import ru.klokov.tsaccounts.specifications.bank_account.BankAccountSearchModel;
 
 import java.util.List;

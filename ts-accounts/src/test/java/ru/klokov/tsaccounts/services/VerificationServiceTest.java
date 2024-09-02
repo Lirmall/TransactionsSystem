@@ -1,10 +1,7 @@
 package ru.klokov.tsaccounts.services;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import ru.klokov.tsaccounts.exceptions.VerificationException;
+import ru.klokov.tscommon.exceptions.VerificationException;
 
 import static org.junit.jupiter.api.Assertions.*;
 

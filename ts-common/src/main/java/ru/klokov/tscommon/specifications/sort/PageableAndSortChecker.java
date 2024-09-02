@@ -1,10 +1,10 @@
-package ru.klokov.tsaccounts.specifications.sort;
+package ru.klokov.tscommon.specifications.sort;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import ru.klokov.tsaccounts.exceptions.VerificationException;
-import ru.klokov.tsaccounts.specifications.BaseSearchModel;
+import ru.klokov.tscommon.exceptions.VerificationException;
+import ru.klokov.tscommon.specifications.BaseSearchModel;
 
 import java.util.List;
 

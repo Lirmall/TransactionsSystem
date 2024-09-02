@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.klokov.tsaccounts.dtos.ExceptionDto;
 import ru.klokov.tsaccounts.exceptions.AlreadyCreatedException;
-import ru.klokov.tsaccounts.exceptions.VerificationException;
+import ru.klokov.tscommon.exceptions.VerificationException;
 
 import java.time.LocalDateTime;
 

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import ru.klokov.tsaccounts.specifications.BaseSearchModel;
+import ru.klokov.tscommon.specifications.BaseSearchModel;
 
 import java.util.List;
 

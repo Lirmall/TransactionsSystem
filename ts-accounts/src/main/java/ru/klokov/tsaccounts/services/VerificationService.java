@@ -1,9 +1,8 @@
 package ru.klokov.tsaccounts.services;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.klokov.tsaccounts.exceptions.VerificationException;
+import ru.klokov.tscommon.exceptions.VerificationException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

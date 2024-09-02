@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tsaccounts.dtos.UserDto;
 import ru.klokov.tsaccounts.entities.UserEntity;
-import ru.klokov.tsaccounts.exceptions.NoMatchingEntryInDatabaseException;
+import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tsaccounts.mappers.UserEntityMapper;
 import ru.klokov.tsaccounts.models.UserModel;
 import ru.klokov.tsaccounts.repositories.UserRepository;

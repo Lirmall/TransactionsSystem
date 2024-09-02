@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.Specification;
 import ru.klokov.tsaccounts.entities.BankAccountEntity;
-import ru.klokov.tsaccounts.specifications.SearchCriteria;
+import ru.klokov.tscommon.specifications.SearchCriteria;
 
 import java.util.ArrayList;
 import java.util.List;

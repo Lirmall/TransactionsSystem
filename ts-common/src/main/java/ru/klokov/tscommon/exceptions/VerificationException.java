@@ -1,4 +1,4 @@
-package ru.klokov.tsaccounts.exceptions;
+package ru.klokov.tscommon.exceptions;
 
 public class VerificationException extends RuntimeException{
     public VerificationException(String message) {

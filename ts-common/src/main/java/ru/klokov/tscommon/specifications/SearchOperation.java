@@ -1,4 +1,4 @@
-package ru.klokov.tsaccounts.specifications;
+package ru.klokov.tscommon.specifications;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
