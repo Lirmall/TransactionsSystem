@@ -3,6 +3,7 @@ package ru.klokov.tstransactions.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tscommon.dtos.TransactionDataDto;
@@ -17,6 +18,8 @@ import ru.klokov.tstransactions.models.TransactionModel;
 import ru.klokov.tstransactions.repositories.DataRepository;
 import ru.klokov.tstransactions.repositories.TransactionRepository;
 import ru.klokov.tstransactions.specifications.TransactionSearchModel;
+import ru.klokov.tstransactions.specifications.TransactionSpecificationBuilder;
+import ru.klokov.tstransactions.specifications.sort.TransactionSortChecker;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -27,9 +30,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TransactionsService {
     private final TransactionRepository transactionRepository;
-
     private final DataRepository dataRepository;
     private final TransactionMapper transactionMapper;
+    private final TransactionSortChecker sortChecker;
 
     @Transactional
     public TransactionModel create(TransactionDto dto) {
@@ -64,7 +67,15 @@ public class TransactionsService {
 
     @Transactional
     public Page<TransactionDto> findByFilterWithCriteria(TransactionSearchModel searchModel) {
-        return null;
+        Pageable pageable = sortChecker.getPageableAndSort(searchModel);
+
+        if(!searchModel.getCriteriaList().isEmpty()) {
+            TransactionSpecificationBuilder builder = new TransactionSpecificationBuilder(searchModel.getCriteriaList());
+            Page<TransactionEntity> entities = transactionRepository.findAll(builder.build(), pageable);
+            return entities.map(transactionMapper::convertEntityToDto);
+        } else {
+            return Page.empty();
+        }
     }
 
     private void verifyBankAccountData(TransactionDto transactionDto) {
