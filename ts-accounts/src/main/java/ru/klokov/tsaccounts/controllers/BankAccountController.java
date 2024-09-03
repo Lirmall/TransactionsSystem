@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +38,11 @@ public class BankAccountController {
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping("/verifyId")
     public VerificationResponse verifyBankAccount(@RequestBody VerificationRequest request) {
-        return new VerificationResponse(bankAccountService.verifyBankAccountById(request.getId()));
+        if(bankAccountService.verifyBankAccountById(request.getId())) {
+            return new VerificationResponse(HttpStatus.OK);
+        } else {
+            return new VerificationResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(
@@ -48,7 +53,11 @@ public class BankAccountController {
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping("/verifyBalance")
     public VerificationResponse verifyBalance(@RequestBody VerificationBalanceRequest request) {
-        return new VerificationResponse(bankAccountService.verifyBankAccountBalanceById(request.getData()));
+        if(bankAccountService.verifyBankAccountBalanceById(request.getData())) {
+            return new VerificationResponse(HttpStatus.OK);
+        } else {
+            return new VerificationResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(
@@ -59,7 +68,12 @@ public class BankAccountController {
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping("/transaction")
     public VerificationResponse transaction(@RequestBody TransactionRequest request) {
-        return new VerificationResponse(bankAccountService.doTransaction(request.getData()));
+        try {
+            bankAccountService.doTransaction(request.getData());
+            return new VerificationResponse(HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new VerificationResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(

@@ -20,7 +20,7 @@ public class DataRepository {
 
     public boolean verifyBankAccount(Long id) {
         VerificationResponse response = restTemplate.postForObject(URL + "/verifyId", id, VerificationResponse.class);
-        return response != null && response.getIsValid();
+        return response != null && response.getStatus().is2xxSuccessful();
     }
 
     public boolean checkBalanceForTransaction(Long recipientId, Double amount) {
@@ -29,12 +29,12 @@ public class DataRepository {
                 new VerificationBalanceRequest(dto),
                 VerificationResponse.class);
 
-        return response != null && response.getIsValid();
+        return response != null && response.getStatus().is2xxSuccessful();
     }
 
     public Boolean doTransaction(TransactionDataDto dto) {
         VerificationResponse response = restTemplate.postForObject(URL + "/transaction",
                 new TransactionRequest(dto), VerificationResponse.class);
-        return response != null && response.getIsValid();
+        return response != null && response.getStatus().is2xxSuccessful();
     }
 }

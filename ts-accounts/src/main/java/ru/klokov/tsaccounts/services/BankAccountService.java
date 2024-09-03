@@ -58,7 +58,7 @@ public class BankAccountService {
     public Boolean verifyBankAccountById(Long id) {
         Optional<BankAccountEntity> foundAccount = bankAccountRepository.findById(id);
 
-        if(foundAccount.isEmpty()) {
+        if (foundAccount.isEmpty()) {
             return false;
         }
 
@@ -104,7 +104,7 @@ public class BankAccountService {
     }
 
     @Transactional
-    public Boolean doTransaction(TransactionDataDto dto) {
+    public void doTransaction(TransactionDataDto dto) {
         BankAccountEntity senderAccount = privateFindById(dto.getSenderId());
         BankAccountEntity recipientAccount = privateFindById(dto.getRecipientId());
         Double amount = dto.getAmount();
@@ -115,20 +115,7 @@ public class BankAccountService {
         senderAccount.setBalance(newSenderBalance);
         recipientAccount.setBalance(newRecipientBalance);
 
-        try {
-            bankAccountRepository.save(senderAccount);
-        } catch (Exception e) {
-            log.error("{}", e.getMessage());
-            return false;
-        }
-
-        try {
-            bankAccountRepository.save(recipientAccount);
-        } catch (Exception e) {
-            log.error("{}", e.getMessage());
-            return false;
-        }
-
-        return true;
+        bankAccountRepository.save(senderAccount);
+        bankAccountRepository.save(recipientAccount);
     }
 }
