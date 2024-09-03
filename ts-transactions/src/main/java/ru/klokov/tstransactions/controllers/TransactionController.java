@@ -4,10 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ru.klokov.tstransactions.dtos.TransactionDto;
 import ru.klokov.tstransactions.mappers.TransactionMapper;
 import ru.klokov.tstransactions.services.TransactionsService;
+import ru.klokov.tstransactions.specifications.TransactionSearchModel;
 
 import java.util.UUID;
 
@@ -39,5 +41,16 @@ public class TransactionController {
     @GetMapping("/{id}")
     public TransactionDto findById(@PathVariable("id") UUID id) {
         return transactionMapper.convertModelToDto(transactionsService.findById(id));
+    }
+
+    @Operation(
+            summary = "Create new transaction",
+            method = "post")
+    @ApiResponse(responseCode = "200", description = "Request successful")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @GetMapping("/filter")
+    public Page<TransactionDto> findByFilter(@RequestBody TransactionSearchModel model) {
+        return transactionsService.findByFilterWithCriteria(model);
     }
 }
