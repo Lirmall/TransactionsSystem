@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tscommon.dtos.TransactionDataDto;
 import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tscommon.exceptions.VerificationException;
-import ru.klokov.tstransactions.dtos.TransactionDto;
+import ru.klokov.tscommon.dtos.TransactionDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
 import ru.klokov.tstransactions.entities.enums.TransactionStatus;
 import ru.klokov.tstransactions.exceptions.TransactionFailedException;

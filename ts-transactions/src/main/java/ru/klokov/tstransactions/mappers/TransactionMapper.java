@@ -8,7 +8,7 @@ import ru.klokov.tstransactions.config.enum_converters.StringToStatusConverter;
 import ru.klokov.tstransactions.config.enum_converters.StringToTypeConverter;
 import ru.klokov.tstransactions.config.enum_converters.TransactionStatusToStringConverter;
 import ru.klokov.tstransactions.config.enum_converters.TransactionTypeToStringConverter;
-import ru.klokov.tstransactions.dtos.TransactionDto;
+import ru.klokov.tscommon.dtos.TransactionDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
 import ru.klokov.tstransactions.models.TransactionModel;
 

@@ -56,7 +56,7 @@ public class UserController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @GetMapping("/findByBankAccountIds")
-    public Set<UserSimpleDataDto> findById(@RequestBody Collection<Long> bankAccountIds) {
+    public Set<UserSimpleDataDto> findByIdsList(@RequestBody Collection<Long> bankAccountIds) {
         return userService.findUsersByBankAccountIdsList(bankAccountIds);
     }
 
