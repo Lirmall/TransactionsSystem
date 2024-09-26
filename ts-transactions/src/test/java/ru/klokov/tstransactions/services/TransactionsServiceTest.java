@@ -149,4 +149,43 @@ class TransactionsServiceTest {
         assertEquals("Failed", dto3.getStatus());
         assertEquals(LocalDateTime.of(2024, 8, 27, 13, 1, 17, 327295000), dto3.getTransactionDate());
     }
+
+    @Test
+    void findByFilterWithTwoDatesTest2() {
+        TransactionSearchModel modelWithTwoDates = TransactionSearchModelReturner.returnModelWithTwoDates();
+        modelWithTwoDates.setSortColumn("transactionDate");
+
+        Page<TransactionDto> result = transactionsService.findByFilterWithCriteria(modelWithTwoDates);
+        assertNotNull(result);
+
+        assertEquals(3, result.getTotalElements());
+
+        TransactionDto dto1 = result.getContent().get(0);
+        TransactionDto dto2 = result.getContent().get(1);
+        TransactionDto dto3 = result.getContent().get(2);
+
+        assertEquals(UUID.fromString("92438179-2a53-4a15-bc9a-5b741454e729"), dto1.getId());
+        assertEquals(2, dto1.getSenderId());
+        assertEquals(4, dto1.getRecipientId());
+        assertEquals(648.73, dto1.getAmount());
+        assertEquals("Cash Withdrawal", dto1.getType());
+        assertEquals("Failed", dto1.getStatus());
+        assertEquals(LocalDateTime.of(2024, 8, 27, 13, 1, 17, 327295000), dto1.getTransactionDate());
+
+        assertEquals(UUID.fromString("68931356-6783-4424-a0f5-6556efafad72"), dto2.getId());
+        assertEquals(3, dto2.getSenderId());
+        assertEquals(5, dto2.getRecipientId());
+        assertEquals(108.95, dto2.getAmount());
+        assertEquals("Transfer", dto2.getType());
+        assertEquals("In Progress", dto2.getStatus());
+        assertEquals(LocalDateTime.of(2024, 8, 28, 13, 59, 25, 20368000), dto2.getTransactionDate());
+
+        assertEquals(UUID.fromString("7f21cfbb-4919-4e39-a6af-23005a878132"), dto3.getId());
+        assertEquals(6, dto3.getSenderId());
+        assertEquals(4, dto3.getRecipientId());
+        assertEquals(6431.3, dto3.getAmount());
+        assertEquals("Deposit", dto3.getType());
+        assertEquals("Success", dto3.getStatus());
+        assertEquals(LocalDateTime.of(2024, 8, 28, 23, 11, 4, 366859000), dto3.getTransactionDate());
+    }
 }
