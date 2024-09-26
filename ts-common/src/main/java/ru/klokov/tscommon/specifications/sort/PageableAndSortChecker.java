@@ -1,7 +1,6 @@
 package ru.klokov.tscommon.specifications.sort;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import ru.klokov.tscommon.exceptions.VerificationException;
 import ru.klokov.tscommon.specifications.BaseSearchModel;
@@ -10,7 +9,7 @@ import java.util.List;
 
 public interface PageableAndSortChecker {
 
-    default Pageable getPageableAndSort(BaseSearchModel model) {
+    default PageRequest getPageableAndSort(BaseSearchModel model) {
         Sort sort = this.sortColumnCheck(model);
 
         int page = model.getPages() != null ? model.getPages() : 0;
@@ -30,7 +29,6 @@ public interface PageableAndSortChecker {
                 this.columnCheck(sortColumn);
             } else {
                 this.columnCheck(sortColumn);
-                sortColumn = sortColumn.toLowerCase();
             }
         } else {
             sortColumn = "id";
