@@ -3,6 +3,8 @@ package ru.klokov.tstransactions.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +24,7 @@ import ru.klokov.tstransactions.specifications.TransactionSpecificationBuilder;
 import ru.klokov.tstransactions.specifications.sort.TransactionSortChecker;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -66,15 +67,17 @@ public class TransactionsService {
     }
 
     @Transactional
-    public Page<TransactionDto> findByFilterWithCriteria(TransactionSearchModel searchModel) {
-        Pageable pageable = sortChecker.getPageableAndSort(searchModel);
+    public PageImpl<TransactionDto> findByFilterWithCriteria(TransactionSearchModel searchModel) {
+        PageRequest pageable = sortChecker.getPageableAndSort(searchModel);
 
         if(!searchModel.getCriteriaList().isEmpty()) {
             TransactionSpecificationBuilder builder = new TransactionSpecificationBuilder(searchModel.getCriteriaList());
             Page<TransactionEntity> entities = transactionRepository.findAll(builder.build(), pageable);
-            return entities.map(transactionMapper::convertEntityToDto);
+            List<TransactionDto> dtos = entities.getContent().stream().map(transactionMapper::convertEntityToDto).toList();
+
+            return new PageImpl<>(dtos, pageable, dtos.size());
         } else {
-            return Page.empty();
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
         }
     }
 
