@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
+import ru.klokov.tscommon.dtos.ReportTransactionDto;
 import ru.klokov.tstransactions.config.enum_converters.StringToStatusConverter;
 import ru.klokov.tstransactions.config.enum_converters.StringToTypeConverter;
 import ru.klokov.tstransactions.config.enum_converters.TransactionStatusToStringConverter;
@@ -47,5 +48,9 @@ public class TransactionMapper {
 
     public TransactionEntity convertModelToEntity(TransactionModel model) {
         return modelMapper.map(model, TransactionEntity.class);
+    }
+
+    public ReportTransactionDto convertTransDTOToRepTransDTO(TransactionDto dto) {
+        return modelMapper.map(dto, ReportTransactionDto.class);
     }
 }
