@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
+import ru.klokov.tscommon.dtos.PagedResult;
+import ru.klokov.tscommon.dtos.ReportTransactionDto;
 import ru.klokov.tscommon.dtos.TransactionDto;
 
 @Getter
@@ -13,5 +13,5 @@ import ru.klokov.tscommon.dtos.TransactionDto;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionResponse {
-    private Page<TransactionDto> transactionDtoPage;
+    private PagedResult<ReportTransactionDto> transactionDtoPage;
 }
