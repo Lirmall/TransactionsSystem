@@ -50,12 +50,12 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Get user by id",
+            summary = "Get users by bank accounts list",
             method = "get")
     @ApiResponse(responseCode = "200", description = "Request successful")
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
-    @GetMapping("/findByBankAccountIds")
+    @PostMapping("/findByBankAccountIds")
     public Set<UserSimpleDataDto> findByIdsList(@RequestBody Collection<Long> bankAccountIds) {
         return userService.findUsersByBankAccountIdsList(bankAccountIds);
     }
