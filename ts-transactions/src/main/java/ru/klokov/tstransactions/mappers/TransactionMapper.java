@@ -11,6 +11,8 @@ import ru.klokov.tstransactions.config.enum_converters.TransactionStatusToString
 import ru.klokov.tstransactions.config.enum_converters.TransactionTypeToStringConverter;
 import ru.klokov.tscommon.dtos.TransactionDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
+import ru.klokov.tstransactions.entities.enums.TransactionStatus;
+import ru.klokov.tstransactions.entities.enums.TransactionType;
 import ru.klokov.tstransactions.models.TransactionModel;
 
 @Component
@@ -51,6 +53,10 @@ public class TransactionMapper {
     }
 
     public ReportTransactionDto convertTransDTOToRepTransDTO(TransactionDto dto) {
-        return modelMapper.map(dto, ReportTransactionDto.class);
+        ReportTransactionDto result = modelMapper.map(dto, ReportTransactionDto.class);
+        result.setTypeId(TransactionType.getByName(dto.getType()).getId());
+        result.setStatusId(TransactionStatus.getByName(dto.getStatus()).getId());
+
+        return result;
     }
 }
