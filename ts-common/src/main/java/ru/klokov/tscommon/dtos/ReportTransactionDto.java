@@ -27,10 +27,16 @@ public class ReportTransactionDto {
     @Schema(description = "Идентификатор суммы транзакции", requiredMode = Schema.RequiredMode.REQUIRED)
     private Double amount;
 
+    @Schema(description = "Идентификатор типа транзакции", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long typeId;
+
     @Schema(description = "Тип транзакции",
             requiredMode = Schema.RequiredMode.REQUIRED,
             allowableValues = {"Payment", "Deposit", "Cash Withdrawal", "Transfer"})
     private String type;
+
+    @Schema(description = "Идентификатор статуса транзакции", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long statusId;
 
     @Schema(description = "Статус транзакции")
     private String status;
