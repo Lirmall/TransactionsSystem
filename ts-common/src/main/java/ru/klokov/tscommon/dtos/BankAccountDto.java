@@ -1,4 +1,4 @@
-package ru.klokov.tsaccounts.dtos;
+package ru.klokov.tscommon.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;

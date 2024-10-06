@@ -1,4 +1,4 @@
-package ru.klokov.tsaccounts.specifications.user;
+package ru.klokov.tscommon.specifications.search_models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

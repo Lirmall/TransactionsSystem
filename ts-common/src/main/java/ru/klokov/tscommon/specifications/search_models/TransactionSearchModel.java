@@ -1,4 +1,4 @@
-package ru.klokov.tsaccounts.specifications.bank_account;
+package ru.klokov.tscommon.specifications.search_models;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Список критериев поиска")
-public class BankAccountSearchModel extends BaseSearchModel {
+@Schema(description = "Список критериев поиска транзакций")
+public class TransactionSearchModel extends BaseSearchModel {
     private List<SearchCriteria> criteriaList;
 }
