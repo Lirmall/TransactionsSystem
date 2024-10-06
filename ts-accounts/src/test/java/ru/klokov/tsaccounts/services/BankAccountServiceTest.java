@@ -8,11 +8,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tsaccounts.config.TestContainerConfExtension;
-import ru.klokov.tsaccounts.dtos.BankAccountDto;
+import ru.klokov.tscommon.dtos.BankAccountDto;
 import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tscommon.exceptions.VerificationException;
 import ru.klokov.tsaccounts.models.BankAccountModel;
-import ru.klokov.tsaccounts.specifications.bank_account.BankAccountSearchModel;
+import ru.klokov.tscommon.specifications.search_models.BankAccountSearchModel;
 import ru.klokov.tsaccounts.test_objects.BankAccountSearchModelReturner;
 import ru.klokov.tscommon.dtos.BankAccountBalanceVerificationDto;
 import ru.klokov.tscommon.dtos.TransactionDataDto;
@@ -95,6 +95,15 @@ class BankAccountServiceTest {
         Page<BankAccountDto> result = bankAccountService.findByFilterWithCriteria(modelWithOneId);
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void findByFilterWithCriteriaTwoIdsTest1() {
+        BankAccountSearchModel modelWithTwoIds = BankAccountSearchModelReturner.returnModelWithTwoIds();
+
+        Page<BankAccountDto> result = bankAccountService.findByFilterWithCriteria(modelWithTwoIds);
+        assertNotNull(result);
+        assertEquals(2, result.getTotalElements());
     }
 
     @Test

@@ -2,7 +2,7 @@ package ru.klokov.tsaccounts.test_objects;
 
 import ru.klokov.tscommon.specifications.SearchCriteria;
 import ru.klokov.tscommon.specifications.SearchOperation;
-import ru.klokov.tsaccounts.specifications.bank_account.BankAccountSearchModel;
+import ru.klokov.tscommon.specifications.search_models.BankAccountSearchModel;
 
 import java.util.List;
 
@@ -14,6 +14,23 @@ public class BankAccountSearchModelReturner {
         criteria.setFieldValue(1);
 
         List<SearchCriteria> criteriaList = List.of(criteria);
+
+        return new BankAccountSearchModel(criteriaList);
+    }
+    public static BankAccountSearchModel returnModelWithTwoIds() {
+        SearchCriteria criteria = new SearchCriteria();
+        criteria.setFieldName("id");
+        criteria.setSearchOperation(SearchOperation.EQUALITY);
+        criteria.setFieldValue(1);
+        criteria.setOrPredicate(true);
+
+        SearchCriteria criteria2 = new SearchCriteria();
+        criteria2.setFieldName("id");
+        criteria2.setSearchOperation(SearchOperation.EQUALITY);
+        criteria2.setFieldValue(2);
+        criteria2.setOrPredicate(true);
+
+        List<SearchCriteria> criteriaList = List.of(criteria, criteria2);
 
         return new BankAccountSearchModel(criteriaList);
     }

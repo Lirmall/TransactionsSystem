@@ -4,21 +4,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.klokov.tsaccounts.dtos.BankAccountDto;
 import ru.klokov.tsaccounts.mappers.BankAccountMapper;
 import ru.klokov.tsaccounts.models.BankAccountModel;
 import ru.klokov.tsaccounts.services.BankAccountService;
-import ru.klokov.tsaccounts.specifications.bank_account.BankAccountSearchModel;
-import ru.klokov.tscommon.requests.TransactionRequest;
-import ru.klokov.tscommon.requests.VerificationBalanceRequest;
-import ru.klokov.tscommon.requests.VerificationRequest;
-import ru.klokov.tscommon.requests.VerificationResponse;
+import ru.klokov.tscommon.dtos.BankAccountDto;
+import ru.klokov.tscommon.dtos.PagedResult;
+import ru.klokov.tscommon.requests.*;
+import ru.klokov.tscommon.specifications.search_models.BankAccountSearchModel;
 
 import java.util.List;
 
@@ -83,8 +80,8 @@ public class BankAccountController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping("/filter")
-    public Page<BankAccountDto> findByFilter(@RequestBody BankAccountSearchModel model) {
-        return bankAccountService.findByFilterWithCriteria(model);
+    public BankAccountResponse findByFilter(@RequestBody BankAccountSearchModel model) {
+        return new BankAccountResponse(new PagedResult<>(bankAccountService.findByFilterWithCriteria(model)));
     }
 
     @Operation(
