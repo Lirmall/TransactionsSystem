@@ -125,14 +125,14 @@ class UserControllerTest {
                             .content(body))
                     .andExpect(status().isOk())
                     .andDo(print())
-                    .andExpect(jsonPath("$.content.[0].id").value(1))
-                    .andExpect(jsonPath("$.content.[0].username").value("testusername"))
-                    .andExpect(jsonPath("$.content.[0].secondName").value("Testov"))
-                    .andExpect(jsonPath("$.content.[0].firstName").value("Test"))
-                    .andExpect(jsonPath("$.content.[0].thirdName").doesNotExist())
-                    .andExpect(jsonPath("$.content.[0].email").value("test@example.com"))
-                    .andExpect(jsonPath("$.content.[0].phoneNumber").value("+1 (555) 123-4567"))
-                    .andExpect(jsonPath("$.content.[0].blocked").value(false))
-                    .andExpect(jsonPath("$.content.[0].deleted").value(false));
+                    .andExpect(jsonPath("$.userDtoPagedResult.content.[0].id").value(1))
+                    .andExpect(jsonPath("$.userDtoPagedResult.content.[0].username").value("testusername"))
+                    .andExpect(jsonPath("$.userDtoPagedResult.content.[0].secondName").value("Testov"))
+                    .andExpect(jsonPath("$.userDtoPagedResult.content.[0].firstName").value("Test"))
+                    .andExpect(jsonPath("$.userDtoPagedResult.content.[0].thirdName").doesNotExist())
+                    .andExpect(jsonPath("$.userDtoPagedResult.content.[0].email").value("test@example.com"))
+                    .andExpect(jsonPath("$.userDtoPagedResult.content.[0].phoneNumber").value("+1 (555) 123-4567"))
+                    .andExpect(jsonPath("$.userDtoPagedResult.content.[0].blocked").value(false))
+                    .andExpect(jsonPath("$.userDtoPagedResult.content.[0].deleted").value(false));
     }
 }

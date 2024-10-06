@@ -14,7 +14,7 @@ import ru.klokov.tsaccounts.exceptions.AlreadyCreatedException;
 import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tscommon.exceptions.VerificationException;
 import ru.klokov.tsaccounts.models.UserModel;
-import ru.klokov.tsaccounts.specifications.user.UserSearchModel;
+import ru.klokov.tscommon.specifications.search_models.UserSearchModel;
 import ru.klokov.tsaccounts.test_objects.UserSearchModelReturner;
 import ru.klokov.tscommon.dtos.UserSimpleDataDto;
 

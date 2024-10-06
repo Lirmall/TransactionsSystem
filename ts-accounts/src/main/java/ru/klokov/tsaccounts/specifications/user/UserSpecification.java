@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 import ru.klokov.tsaccounts.entities.UserEntity;
+import ru.klokov.tscommon.specifications.search_models.UserSearchModel;
 
 import java.util.ArrayList;
 import java.util.List;

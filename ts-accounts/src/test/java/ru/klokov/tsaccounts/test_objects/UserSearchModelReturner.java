@@ -1,6 +1,6 @@
 package ru.klokov.tsaccounts.test_objects;
 
-import ru.klokov.tsaccounts.specifications.user.UserSearchModel;
+import ru.klokov.tscommon.specifications.search_models.UserSearchModel;
 
 import java.util.List;
 

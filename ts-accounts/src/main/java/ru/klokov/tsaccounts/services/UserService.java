@@ -13,7 +13,7 @@ import ru.klokov.tsaccounts.mappers.UserEntityMapper;
 import ru.klokov.tsaccounts.models.UserModel;
 import ru.klokov.tsaccounts.repositories.UserRepository;
 import ru.klokov.tsaccounts.specifications.sort.UserSortChecker;
-import ru.klokov.tsaccounts.specifications.user.UserSearchModel;
+import ru.klokov.tscommon.specifications.search_models.UserSearchModel;
 import ru.klokov.tsaccounts.specifications.user.UserSpecification;
 import ru.klokov.tscommon.dtos.UserSimpleDataDto;
 

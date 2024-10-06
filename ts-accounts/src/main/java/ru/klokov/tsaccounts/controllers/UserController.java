@@ -10,12 +10,13 @@ import ru.klokov.tsaccounts.dtos.UserDto;
 import ru.klokov.tsaccounts.mappers.UserEntityMapper;
 import ru.klokov.tsaccounts.models.UserModel;
 import ru.klokov.tsaccounts.services.UserService;
-import ru.klokov.tsaccounts.specifications.user.UserSearchModel;
-import ru.klokov.tscommon.dtos.UserSimpleDataDto;
+import ru.klokov.tscommon.requests.UserResponse;
+import ru.klokov.tscommon.specifications.search_models.UserSearchModel;
+import ru.klokov.tscommon.dtos.PagedResult;
+import ru.klokov.tscommon.requests.UsersSimpleResponse;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @RestController
@@ -56,8 +57,8 @@ public class UserController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping("/findByBankAccountIds")
-    public Set<UserSimpleDataDto> findByIdsList(@RequestBody Collection<Long> bankAccountIds) {
-        return userService.findUsersByBankAccountIdsList(bankAccountIds);
+    public UsersSimpleResponse findByIdsList(@RequestBody Collection<Long> bankAccountIds) {
+        return new UsersSimpleResponse(userService.findUsersByBankAccountIdsList(bankAccountIds).stream().toList());
     }
 
     @Operation(
@@ -67,9 +68,9 @@ public class UserController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping("/filter")
-    public Page<UserDto> findByFilter(@RequestBody UserSearchModel model) {
+    public UserResponse findByFilter(@RequestBody UserSearchModel model) {
         Page<UserModel> modelsPage = userService.findByFilter(model);
-        return modelsPage.map(userEntityMapper::convertModelToDTO);
+        return new UserResponse(new PagedResult<>(modelsPage.map(userEntityMapper::convertModelToUserReportDtoDTO)));
     }
 
     @Operation(

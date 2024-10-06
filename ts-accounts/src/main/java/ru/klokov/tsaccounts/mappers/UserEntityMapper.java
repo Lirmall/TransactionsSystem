@@ -3,6 +3,7 @@ package ru.klokov.tsaccounts.mappers;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
+import ru.klokov.tscommon.dtos.ReportUserDto;
 import ru.klokov.tsaccounts.dtos.UserDto;
 import ru.klokov.tsaccounts.entities.UserEntity;
 import ru.klokov.tsaccounts.models.UserModel;
@@ -17,6 +18,10 @@ public class UserEntityMapper {
 
     public UserDto convertModelToDTO(UserModel model) {
         return modelMapper.map(model, UserDto.class);
+    }
+
+    public ReportUserDto convertModelToUserReportDtoDTO(UserModel model) {
+        return modelMapper.map(model, ReportUserDto.class);
     }
 
     public UserDto convertEntityToDTO(UserEntity entity) {
