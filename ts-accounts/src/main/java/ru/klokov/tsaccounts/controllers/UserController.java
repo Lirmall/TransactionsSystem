@@ -10,12 +10,10 @@ import ru.klokov.tsaccounts.dtos.UserDto;
 import ru.klokov.tsaccounts.mappers.UserEntityMapper;
 import ru.klokov.tsaccounts.models.UserModel;
 import ru.klokov.tsaccounts.services.UserService;
+import ru.klokov.tscommon.dtos.PagedResult;
 import ru.klokov.tscommon.requests.UserResponse;
 import ru.klokov.tscommon.specifications.search_models.UserSearchModel;
-import ru.klokov.tscommon.dtos.PagedResult;
-import ru.klokov.tscommon.requests.UsersSimpleResponse;
 
-import java.util.Collection;
 import java.util.List;
 
 @Slf4j
@@ -48,17 +46,6 @@ public class UserController {
     public UserDto findById(@PathVariable("id") Long id) {
         UserModel user = userService.findById(id);
         return userEntityMapper.convertModelToDTO(user);
-    }
-
-    @Operation(
-            summary = "Get users by bank accounts list",
-            method = "get")
-    @ApiResponse(responseCode = "200", description = "Request successful")
-    @ApiResponse(responseCode = "400", description = "Bad request")
-    @ApiResponse(responseCode = "500", description = "Internal server error")
-    @PostMapping("/findByBankAccountIds")
-    public UsersSimpleResponse findByIdsList(@RequestBody Collection<Long> bankAccountIds) {
-        return new UsersSimpleResponse(userService.findUsersByBankAccountIdsList(bankAccountIds).stream().toList());
     }
 
     @Operation(
