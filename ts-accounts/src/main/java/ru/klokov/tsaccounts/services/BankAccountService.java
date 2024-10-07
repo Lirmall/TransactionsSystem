@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.klokov.tscommon.dtos.BankAccountDto;
+import ru.klokov.tsaccounts.dtos.BankAccountDto;
 import ru.klokov.tsaccounts.entities.BankAccountEntity;
 import ru.klokov.tsaccounts.entities.UserEntity;
 import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
