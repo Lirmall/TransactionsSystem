@@ -16,7 +16,7 @@ import ru.klokov.tscommon.specifications.SearchCriteria;
 import ru.klokov.tscommon.specifications.SearchOperation;
 import ru.klokov.tstransactions.mappers.TransactionMapper;
 import ru.klokov.tstransactions.services.TransactionsService;
-import ru.klokov.tstransactions.specifications.TransactionSearchModel;
+import ru.klokov.tscommon.specifications.search_models.TransactionSearchModel;
 
 import java.util.List;
 import java.util.UUID;
@@ -57,9 +57,11 @@ public class TransactionController {
     @ApiResponse(responseCode = "200", description = "Request successful")
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
-    @GetMapping("/filter")
-    public PageImpl<TransactionDto> findByFilter(@RequestBody TransactionSearchModel model) {
-        return transactionsService.findByFilterWithCriteria(model);
+    @PostMapping("/filter")
+    public TransactionResponse findByFilter(@RequestBody TransactionSearchModel model) {
+        PageImpl<TransactionDto> dtos = transactionsService.findByFilterWithCriteria(model);
+        Page<ReportTransactionDto> content = dtos.map(transactionMapper::convertTransDTOToRepTransDTO);
+        return new TransactionResponse(new PagedResult<>(content));
     }
 
     @Operation(

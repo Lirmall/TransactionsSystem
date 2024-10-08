@@ -2,7 +2,7 @@ package ru.klokov.tstransactions.test_objects;
 
 import ru.klokov.tscommon.specifications.SearchCriteria;
 import ru.klokov.tscommon.specifications.SearchOperation;
-import ru.klokov.tstransactions.specifications.TransactionSearchModel;
+import ru.klokov.tscommon.specifications.search_models.TransactionSearchModel;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +17,24 @@ public class TransactionSearchModelReturner {
         criteria.setFieldValue(UUID.fromString("65833767-1827-4e1e-85ad-c7224290b798"));
 
         List<SearchCriteria> criteriaList = List.of(criteria);
+
+        return new TransactionSearchModel(criteriaList);
+    }
+
+    public static TransactionSearchModel returnModelWithTwoIds() {
+        SearchCriteria criteria = new SearchCriteria();
+        criteria.setFieldName("id");
+        criteria.setSearchOperation(SearchOperation.EQUALITY);
+        criteria.setFieldValue(UUID.fromString("65833767-1827-4e1e-85ad-c7224290b798"));
+        criteria.setOrPredicate(true);
+
+        SearchCriteria criteria2 = new SearchCriteria();
+        criteria2.setFieldName("id");
+        criteria2.setSearchOperation(SearchOperation.EQUALITY);
+        criteria2.setFieldValue(UUID.fromString("2ea54a14-65c5-405e-8b8d-e8515d4179f7"));
+        criteria2.setOrPredicate(true);
+
+        List<SearchCriteria> criteriaList = List.of(criteria, criteria2);
 
         return new TransactionSearchModel(criteriaList);
     }

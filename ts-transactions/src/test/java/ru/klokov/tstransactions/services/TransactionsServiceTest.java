@@ -20,7 +20,7 @@ import ru.klokov.tstransactions.mappers.TransactionMapper;
 import ru.klokov.tstransactions.models.TransactionModel;
 import ru.klokov.tstransactions.repositories.DataRepository;
 import ru.klokov.tstransactions.repositories.TransactionRepository;
-import ru.klokov.tstransactions.specifications.TransactionSearchModel;
+import ru.klokov.tscommon.specifications.search_models.TransactionSearchModel;
 import ru.klokov.tstransactions.specifications.sort.TransactionSortChecker;
 import ru.klokov.tstransactions.test_objects.TransactionSearchModelReturner;
 
@@ -110,6 +110,16 @@ class TransactionsServiceTest {
         assertNotNull(result);
 
         assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void findByFilterWithCriteriaTwoIdsTest() {
+        TransactionSearchModel modelWithTwoIDs = TransactionSearchModelReturner.returnModelWithTwoIds();
+
+        Page<TransactionDto> result = transactionsService.findByFilterWithCriteria(modelWithTwoIDs);
+        assertNotNull(result);
+
+        assertEquals(2, result.getTotalElements());
     }
 
     @Test

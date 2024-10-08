@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tscommon.dtos.TransactionDataDto;
@@ -19,7 +18,7 @@ import ru.klokov.tstransactions.mappers.TransactionMapper;
 import ru.klokov.tstransactions.models.TransactionModel;
 import ru.klokov.tstransactions.repositories.DataRepository;
 import ru.klokov.tstransactions.repositories.TransactionRepository;
-import ru.klokov.tstransactions.specifications.TransactionSearchModel;
+import ru.klokov.tscommon.specifications.search_models.TransactionSearchModel;
 import ru.klokov.tstransactions.specifications.TransactionSpecificationBuilder;
 import ru.klokov.tstransactions.specifications.sort.TransactionSortChecker;
 
