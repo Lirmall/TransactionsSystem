@@ -7,10 +7,10 @@ import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import ru.klokov.tscommon.specifications.SearchCriteria;
-import ru.klokov.tscommon.specifications.SearchOperation;
 import ru.klokov.tstransactions.entities.TransactionEntity;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @AllArgsConstructor
 public class TransactionSpecification implements Specification<TransactionEntity> {
@@ -19,7 +19,7 @@ public class TransactionSpecification implements Specification<TransactionEntity
     @Override
     public Predicate toPredicate(Root<TransactionEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
 
-        if(criteria.getFieldValue() instanceof LocalDateTime) {
+        if(criteria.getFieldValue() instanceof LocalDateTime || criteria.getFieldName().equals("transactionDate")) {
             return localDateTimeHandler(criteria.getFieldValue(), root, query, criteriaBuilder);
         }
 
@@ -35,21 +35,16 @@ public class TransactionSpecification implements Specification<TransactionEntity
             default:
                 return null;
         }
-
-//        if (criteria.getSearchOperation() == SearchOperation.GREATER_THAN) {
-//            return criteriaBuilder.greaterThanOrEqualTo(
-//                    root.get(criteria.getFieldName()), criteria.getFieldValue().toString());
-//        } else if (criteria.getSearchOperation() == SearchOperation.LESS_THAN) {
-//            return criteriaBuilder.lessThanOrEqualTo(
-//                    root.get(criteria.getFieldName()), criteria.getFieldValue().toString());
-//        } else if (criteria.getSearchOperation() == SearchOperation.EQUALITY) {
-//            return criteriaBuilder.equal(root.get(criteria.getFieldName()), criteria.getFieldValue());
-//        }
-//        return null;
     }
 
     private Predicate localDateTimeHandler(Object date, Root<TransactionEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        LocalDateTime dateTimeValue = (LocalDateTime) date;
+        LocalDateTime dateTimeValue;
+
+        if(date instanceof LocalDateTime) {
+            dateTimeValue = (LocalDateTime) date;
+        } else {
+            dateTimeValue = LocalDateTime.parse((String) date, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
         String fieldName = criteria.getFieldName();
 
         switch (criteria.getSearchOperation()) {

@@ -3,14 +3,14 @@ package ru.klokov.tstransactions.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tscommon.dtos.TransactionDataDto;
+import ru.klokov.tscommon.dtos.TransactionDto;
 import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tscommon.exceptions.VerificationException;
-import ru.klokov.tscommon.dtos.TransactionDto;
+import ru.klokov.tscommon.specifications.search_models.TransactionSearchModel;
 import ru.klokov.tstransactions.entities.TransactionEntity;
 import ru.klokov.tstransactions.entities.enums.TransactionStatus;
 import ru.klokov.tstransactions.exceptions.TransactionFailedException;
@@ -18,12 +18,12 @@ import ru.klokov.tstransactions.mappers.TransactionMapper;
 import ru.klokov.tstransactions.models.TransactionModel;
 import ru.klokov.tstransactions.repositories.DataRepository;
 import ru.klokov.tstransactions.repositories.TransactionRepository;
-import ru.klokov.tscommon.specifications.search_models.TransactionSearchModel;
 import ru.klokov.tstransactions.specifications.TransactionSpecificationBuilder;
 import ru.klokov.tstransactions.specifications.sort.TransactionSortChecker;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -66,17 +66,19 @@ public class TransactionsService {
     }
 
     @Transactional
-    public PageImpl<TransactionDto> findByFilterWithCriteria(TransactionSearchModel searchModel) {
+    public Page<TransactionDto> findByFilterWithCriteria(TransactionSearchModel searchModel) {
         PageRequest pageable = sortChecker.getPageableAndSort(searchModel);
 
         if(!searchModel.getCriteriaList().isEmpty()) {
             TransactionSpecificationBuilder builder = new TransactionSpecificationBuilder(searchModel.getCriteriaList());
             Page<TransactionEntity> entities = transactionRepository.findAll(builder.build(), pageable);
-            List<TransactionDto> dtos = entities.getContent().stream().map(transactionMapper::convertEntityToDto).toList();
+            log.info("entities size: {}", entities.getTotalElements());
+            log.info("entities total: {}", entities.getTotalPages());
 
-            return new PageImpl<>(dtos, pageable, dtos.size());
+            Page<TransactionDto> dtoPage = entities.map(transactionMapper::convertEntityToDto);
+            return dtoPage;
         } else {
-            return new PageImpl<>(Collections.emptyList(), pageable, 0);
+            return transactionRepository.findAll(pageable).map(transactionMapper::convertEntityToDto);
         }
     }
 
