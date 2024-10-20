@@ -46,7 +46,7 @@ class TransactionControllerTest {
                     {
                       "fieldName": "transactionDate",
                       "searchOperation": ">",
-                      "fieldValue": "1970-01-01'T'00:00:00.1",
+                      "fieldValue": "1970-01-01T00:00:00.000000001",
                       "orPredicate": false
                     }
                   ]
