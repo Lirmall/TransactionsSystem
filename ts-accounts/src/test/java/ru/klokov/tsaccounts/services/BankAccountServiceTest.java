@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tsaccounts.config.TestContainerConfExtension;
-import ru.klokov.tsaccounts.dtos.BankAccountDto;
+import ru.klokov.tscommon.dtos.BankAccountDto;
 import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tscommon.exceptions.VerificationException;
 import ru.klokov.tsaccounts.models.BankAccountModel;

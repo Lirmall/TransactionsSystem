@@ -10,15 +10,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.klokov.tsaccounts.dtos.CreateBankAccountDto;
 import ru.klokov.tsaccounts.mappers.BankAccountMapper;
 import ru.klokov.tsaccounts.models.BankAccountModel;
 import ru.klokov.tsaccounts.services.BankAccountService;
-import ru.klokov.tsaccounts.dtos.BankAccountDto;
+import ru.klokov.tscommon.dtos.BankAccountDto;
 import ru.klokov.tscommon.dtos.PagedResult;
 import ru.klokov.tscommon.requests.*;
 import ru.klokov.tscommon.specifications.search_models.BankAccountSearchModel;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -81,22 +80,22 @@ public class BankAccountController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping("/filter")
-    public BankAccountResponse findByFilter(@RequestBody BankAccountSearchModel model) {
+    public PagedResult<BankAccountDto> findByFilter(@RequestBody BankAccountSearchModel model) {
         Page<BankAccountDto> dtos = bankAccountService.findByFilterWithCriteria(model);
-        return new BankAccountResponse(new PagedResult<>(dtos.map(bankAccountMapper::convertDtoToRepDTO)));
+        return new PagedResult<>(dtos);
     }
 
-    @Operation(
-            summary = "Find bank account by search criteria",
-            method = "post")
-    @ApiResponse(responseCode = "200", description = "Request successful")
-    @ApiResponse(responseCode = "400", description = "Bad request")
-    @ApiResponse(responseCode = "500", description = "Internal server error")
-    @PostMapping("/find")
-    public List<BankAccountDto> findByOwnerUser(@RequestBody BankAccountDto dto) {
-        List<BankAccountModel> bankAccounts = bankAccountService.findBankAccountsByOwnerUser(dto.getOwnerUserId());
-        return bankAccounts.stream().map(bankAccountMapper::convertModelToDTO).toList();
-    }
+//    @Operation(
+//            summary = "Find bank account by search criteria",
+//            method = "post")
+//    @ApiResponse(responseCode = "200", description = "Request successful")
+//    @ApiResponse(responseCode = "400", description = "Bad request")
+//    @ApiResponse(responseCode = "500", description = "Internal server error")
+//    @PostMapping("/find")
+//    public List<BankAccountDto> findByOwnerUser(@RequestBody BankAccountDto dto) {
+//        List<BankAccountModel> bankAccounts = bankAccountService.findBankAccountsByOwnerUser(dto.getOwnerUserId());
+//        return bankAccounts.stream().map(bankAccountMapper::convertModelToDTO).toList();
+//    }
 
     @Operation(
             summary = "Create new bank account",
@@ -105,7 +104,7 @@ public class BankAccountController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping
-    public BankAccountDto create(@RequestBody BankAccountDto bankAccountDto) {
+    public BankAccountDto create(@RequestBody CreateBankAccountDto bankAccountDto) {
         log.debug("Try to create user bank account for user with id {}", bankAccountDto);
         BankAccountModel model = bankAccountService.create(bankAccountDto.getOwnerUserId());
         return bankAccountMapper.convertModelToDTO(model);
