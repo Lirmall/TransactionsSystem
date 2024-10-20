@@ -1,6 +1,5 @@
 package ru.klokov.tscommon.dtos;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +15,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Schema(description = "Информация о транзакции")
 public class TransactionDto {
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Идентификатор транзакции", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID id;
 
@@ -29,16 +27,20 @@ public class TransactionDto {
     @Schema(description = "Идентификатор суммы транзакции", requiredMode = Schema.RequiredMode.REQUIRED)
     private Double amount;
 
+    @Schema(description = "Идентификатор типа транзакции", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long typeId;
+
     @Schema(description = "Тип транзакции",
             requiredMode = Schema.RequiredMode.REQUIRED,
             allowableValues = {"Payment", "Deposit", "Cash Withdrawal", "Transfer"})
     private String type;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Schema(description = "Идентификатор статуса транзакции", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long statusId;
+
     @Schema(description = "Статус транзакции")
     private String status;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Дата и время транзакции")
     private LocalDateTime transactionDate;
 }
