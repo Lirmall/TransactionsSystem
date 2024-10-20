@@ -23,7 +23,8 @@ public class ReportsService {
     private final ReportsMapper reportsMapper;
 
     @Transactional
-    public void fillReportsToDB(PeriodDto periodDto) {
+    public void fillAllOrNewReportsToDB() {
+        PeriodDto periodDto = new PeriodDto();
         Optional<LocalDateTime> optionalLastReportDate = databaseRepository.getReportEntityWithMaxTransactionDate();
 
         LocalDateTime lastReportDate = optionalLastReportDate.orElse(LocalDateTime.of(1970, 1, 1, 0, 0, 0, 1));
@@ -31,33 +32,34 @@ public class ReportsService {
         log.info("{}", lastReportDate);
 
         periodDto.setPeriodStart(lastReportDate);
+        periodDto.setPeriodEnd(LocalDateTime.now().minusDays(1L).withHour(23).withMinute(59).withSecond(59).withNano(999999999));
 
-        if(periodDto.getPeriodEnd() == null) {
-            periodDto.setPeriodEnd(LocalDateTime.now().minusDays(1L).withHour(23).withMinute(59).withSecond(59).withNano(999999999));
-        }
+        log.info("{}", periodDto.getPeriodEnd());
 
-        Page<ReportTransactionDto> transactionDtoPage = getTransactionsByPeriod(periodDto);
+        Page<TransactionDto> transactionDtoPage = getTransactionsByPeriod(periodDto);
 
-        List<ReportBankAccountDto> bankAccountDtos = getBankAccountDtos(transactionDtoPage);
+        List<BankAccountDto> bankAccountDtos = getBankAccountDtos(transactionDtoPage);
 
-        List<ReportUserDto> userDtos = getUsersData(bankAccountDtos);
+        List<UserDto> userDtos = getUsersData(bankAccountDtos);
 
         List<ReportEntity> entities = createReportEntities(transactionDtoPage, userDtos, bankAccountDtos);
 
-        log.info("transactions {}", transactionDtoPage.getTotalElements());
+        log.info("transactions {}", transactionDtoPage.getNumberOfElements());
+        log.info("transactions all {}", transactionDtoPage.getTotalElements());
+        log.info("transactions pages {}", transactionDtoPage.getTotalPages());
         log.info("users {}", userDtos.size());
         log.info("reports {}", entities.size());
-        databaseRepository.saveAll(entities);
+//        databaseRepository.saveAll(entities);
     }
 
-    private Page<ReportTransactionDto> getTransactionsByPeriod(PeriodDto periodDto) {
+    private Page<TransactionDto> getTransactionsByPeriod(PeriodDto periodDto) {
         return getReportsRepository.getTransactionsByPeriod(periodDto);
     }
 
-    private List<ReportBankAccountDto> getBankAccountDtos(Page<ReportTransactionDto> transactionDtoPage) {
+    private List<BankAccountDto> getBankAccountDtos(Page<TransactionDto> transactionDtoPage) {
         Set<Long> bankAccountDtos = new HashSet<>();
 
-        for (ReportTransactionDto dto : transactionDtoPage.getContent()) {
+        for (TransactionDto dto : transactionDtoPage.getContent()) {
             bankAccountDtos.add(dto.getSenderId());
             bankAccountDtos.add(dto.getRecipientId());
         }
@@ -65,36 +67,36 @@ public class ReportsService {
         return getReportsRepository.getBankAccounts(bankAccountDtos);
     }
 
-    private List<ReportUserDto> getUsersData(List<ReportBankAccountDto> bankAccountDtos) {
+    private List<UserDto> getUsersData(List<BankAccountDto> bankAccountDtos) {
         Set<Long> allAccountsIds = new HashSet<>();
 
         bankAccountDtos.forEach(dto -> allAccountsIds.add(dto.getOwnerUserId()));
 
-        List<ReportUserDto> result = getReportsRepository.getUsersByIds(allAccountsIds);
+        List<UserDto> result = getReportsRepository.getUsersByIds(allAccountsIds);
 
         return result;
     }
 
-    private List<ReportEntity> createReportEntities(Page<ReportTransactionDto> transactionDtos, List<ReportUserDto> userDtos, List<ReportBankAccountDto> bankAccountDtos) {
+    private List<ReportEntity> createReportEntities(Page<TransactionDto> transactionDtos, List<UserDto> userDtos, List<BankAccountDto> bankAccountDtos) {
         List<ReportEntity> entities = new ArrayList<>();
 
-        for (ReportTransactionDto transaction: transactionDtos) {
-            Optional<ReportBankAccountDto> optSenderBA = bankAccountDtos.stream().filter(b -> b.getId().equals(transaction.getSenderId())).findFirst();
-            Optional<ReportBankAccountDto> optRecBA = bankAccountDtos.stream().filter(b -> b.getId().equals(transaction.getRecipientId())).findFirst();
+        for (TransactionDto transaction: transactionDtos) {
+            Optional<BankAccountDto> optSenderBA = bankAccountDtos.stream().filter(b -> b.getId().equals(transaction.getSenderId())).findFirst();
+            Optional<BankAccountDto> optRecBA = bankAccountDtos.stream().filter(b -> b.getId().equals(transaction.getRecipientId())).findFirst();
 
             if(optSenderBA.isEmpty() || optRecBA.isEmpty()) {
                 throw new RuntimeException("Sender or recipient bank account is empty");
             }
 
-            Optional<ReportUserDto> optSender = userDtos.stream().filter(u -> u.getId().equals(optSenderBA.get().getOwnerUserId())).findFirst();
-            Optional<ReportUserDto> optRecipient = userDtos.stream().filter(u -> u.getId().equals(optRecBA.get().getOwnerUserId())).findFirst();
+            Optional<UserDto> optSender = userDtos.stream().filter(u -> u.getId().equals(optSenderBA.get().getOwnerUserId())).findFirst();
+            Optional<UserDto> optRecipient = userDtos.stream().filter(u -> u.getId().equals(optRecBA.get().getOwnerUserId())).findFirst();
 
             if(optSender.isEmpty() || optRecipient.isEmpty()) {
                 throw new RuntimeException("Sender or recipient is empty");
             }
 
-            ReportUserDto sender = optSender.get();
-            ReportUserDto recipient = optSender.get();
+            UserDto sender = optSender.get();
+            UserDto recipient = optSender.get();
 
             entities.add(reportsMapper.convertDtosToReport(transaction, sender, recipient));
         }

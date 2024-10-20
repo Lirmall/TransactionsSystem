@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.klokov.tscommon.dtos.PeriodDto;
 import ru.klokov.tsreports.mappers.ReportsMapper;
 import ru.klokov.tsreports.services.ReportsService;
 
@@ -24,7 +23,7 @@ public class ReportsController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @GetMapping()
-    public void fillReportsToDB() {
-        reportsService.fillReportsToDB(new PeriodDto(null, null));
+    public void fillAllOrNewReportsToDB() {
+        reportsService.fillAllOrNewReportsToDB();
     }
 }
