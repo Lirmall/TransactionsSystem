@@ -3,8 +3,8 @@ package ru.klokov.tsreports.mappers;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
-import ru.klokov.tscommon.dtos.ReportTransactionDto;
-import ru.klokov.tscommon.dtos.ReportUserDto;
+import ru.klokov.tscommon.dtos.TransactionDto;
+import ru.klokov.tscommon.dtos.UserDto;
 import ru.klokov.tsreports.dtos.ReportDto;
 import ru.klokov.tsreports.entities.ReportEntity;
 
@@ -22,7 +22,7 @@ public class ReportsMapper {
         return modelMapper.map(entity, ReportDto.class);
     }
 
-    public ReportEntity convertDtosToReport(ReportTransactionDto transactionDto, ReportUserDto sender, ReportUserDto recipient) {
+    public ReportEntity convertDtosToReport(TransactionDto transactionDto, UserDto sender, UserDto recipient) {
         ReportEntity entity = new ReportEntity();
 
         entity.setSenderUserId(sender.getId());

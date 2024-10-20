@@ -3,10 +3,9 @@ package ru.klokov.tsaccounts.mappers;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
-import ru.klokov.tscommon.dtos.BankAccountDto;
 import ru.klokov.tsaccounts.entities.BankAccountEntity;
 import ru.klokov.tsaccounts.models.BankAccountModel;
-import ru.klokov.tscommon.dtos.ReportBankAccountDto;
+import ru.klokov.tscommon.dtos.BankAccountDto;
 
 @Component
 @RequiredArgsConstructor
@@ -15,12 +14,6 @@ public class BankAccountMapper {
 
     public BankAccountDto convertModelToDTO(BankAccountModel model) {
         BankAccountDto bankAccountDto = new BankAccountDto();
-        modelMapper.map(model, bankAccountDto);
-        return bankAccountDto;
-    }
-
-    public ReportBankAccountDto convertDtoToRepDTO(BankAccountDto model) {
-        ReportBankAccountDto bankAccountDto = new ReportBankAccountDto();
         modelMapper.map(model, bankAccountDto);
         return bankAccountDto;
     }
