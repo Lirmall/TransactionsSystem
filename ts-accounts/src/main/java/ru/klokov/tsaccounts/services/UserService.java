@@ -6,7 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.klokov.tsaccounts.dtos.UserDto;
+import ru.klokov.tsaccounts.dtos.CreateOrUpdateUserDto;
+import ru.klokov.tscommon.dtos.UserDto;
 import ru.klokov.tsaccounts.entities.UserEntity;
 import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tsaccounts.mappers.UserEntityMapper;
@@ -36,12 +37,12 @@ public class UserService {
     private final VerificationService verificationService;
 
     @Transactional
-    public UserModel create(UserDto userDto) {
+    public UserModel create(CreateOrUpdateUserDto userDto) {
         this.checkUserData(userDto);
 
         log.debug("Verification success. Create user");
 
-        UserEntity userToSave = userEntityMapper.convertDtoToEntity(userDto);
+        UserEntity userToSave = userEntityMapper.convertCreateDtoToEntity(userDto);
 
         UserEntity userEntity = userRepository.save(userToSave);
 
@@ -140,7 +141,7 @@ public class UserService {
         return userEntityMapper.convertEntityToDTO(userRepository.save(userToBlock));
     }
 
-    private void checkUserData(UserDto dto) {
+    private void checkUserData(CreateOrUpdateUserDto dto) {
         log.debug("Check user data");
         validationService.validateUsername(dto.getUsername());
         verificationService.verifyUserEmail(dto.getEmail());

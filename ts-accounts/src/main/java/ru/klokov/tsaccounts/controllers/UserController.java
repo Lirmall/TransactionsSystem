@@ -6,12 +6,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-import ru.klokov.tsaccounts.dtos.UserDto;
+import ru.klokov.tsaccounts.dtos.CreateOrUpdateUserDto;
+import ru.klokov.tscommon.dtos.UserDto;
 import ru.klokov.tsaccounts.mappers.UserEntityMapper;
 import ru.klokov.tsaccounts.models.UserModel;
 import ru.klokov.tsaccounts.services.UserService;
 import ru.klokov.tscommon.dtos.PagedResult;
-import ru.klokov.tscommon.requests.UserResponse;
 import ru.klokov.tscommon.specifications.search_models.UserSearchModel;
 
 import java.util.List;
@@ -55,9 +55,9 @@ public class UserController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping("/filter")
-    public UserResponse findByFilter(@RequestBody UserSearchModel model) {
+    public PagedResult<UserDto> findByFilter(@RequestBody UserSearchModel model) {
         Page<UserModel> modelsPage = userService.findByFilter(model);
-        return new UserResponse(new PagedResult<>(modelsPage.map(userEntityMapper::convertModelToUserReportDtoDTO)));
+        return new PagedResult<>(modelsPage.map(userEntityMapper::convertModelToDTO));
     }
 
     @Operation(
@@ -67,7 +67,7 @@ public class UserController {
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping
-    public UserDto create(@RequestBody UserDto userDto) {
+    public UserDto create(@RequestBody CreateOrUpdateUserDto userDto) {
         log.debug("Try to create user from controller");
         UserModel model = userService.create(userDto);
         return userEntityMapper.convertModelToDTO(model);

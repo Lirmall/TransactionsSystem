@@ -1,6 +1,5 @@
-package ru.klokov.tsaccounts.dtos;
+package ru.klokov.tscommon.dtos;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,8 +13,6 @@ import org.springframework.lang.Nullable;
 @AllArgsConstructor
 @Schema(description = "Информация о пользователе")
 public class UserDto {
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Идентификатор пользователя", requiredMode = Schema.RequiredMode.REQUIRED)
     private Long id = null;
 
@@ -42,11 +39,9 @@ public class UserDto {
             example = "+1(111) 111-1111")
     private String phoneNumber;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Признак заблокированного пользователя", defaultValue = "false")
     private Boolean blocked = false;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Schema(description = "Признак удалённоно пользователя", defaultValue = "false")
     private Boolean deleted = false;
 }

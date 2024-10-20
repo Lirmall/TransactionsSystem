@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tsaccounts.config.TestContainerConfExtension;
-import ru.klokov.tsaccounts.dtos.UserDto;
+import ru.klokov.tsaccounts.dtos.CreateOrUpdateUserDto;
 import ru.klokov.tsaccounts.exceptions.AlreadyCreatedException;
 import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tscommon.exceptions.VerificationException;
@@ -34,17 +34,17 @@ class UserServiceTest {
     @Autowired
     private UserService userService;
 
-    private static final String CREATE_USERNAME = "username";
-    private static final String CREATE_FIRST_NAME = "Fortest";
-    private static final String CREATE_SECOND_NAME = "Fortestov";
-    private static final String CREATE_THIRD_NAME = "Fortestovich";
-    private static final String CREATE_EMAIL = "test@test.ru";
-    private static final String CREATE_PHONE_NUMBER = "+7 (123) 456-7890";
+    private final String CREATE_USERNAME = "username";
+    private final String CREATE_FIRST_NAME = "Fortest";
+    private final String CREATE_SECOND_NAME = "Fortestov";
+    private final String CREATE_THIRD_NAME = "Fortestovich";
+    private final String CREATE_EMAIL = "test@test.ru";
+    private final String CREATE_PHONE_NUMBER = "+7 (123) 456-7890";
 
     @Test
     @Transactional
     void createTest() {
-        UserDto userDto = new UserDto();
+        CreateOrUpdateUserDto userDto = new CreateOrUpdateUserDto();
         userDto.setUsername(CREATE_USERNAME);
         userDto.setFirstName(CREATE_FIRST_NAME);
         userDto.setSecondName(CREATE_SECOND_NAME);
@@ -69,7 +69,7 @@ class UserServiceTest {
     @Test
     @Transactional
     void createAlreadyCreatedUser() {
-        UserDto userDto = new UserDto();
+        CreateOrUpdateUserDto userDto = new CreateOrUpdateUserDto();
         userDto.setUsername("testusername");
         userDto.setFirstName(CREATE_FIRST_NAME);
         userDto.setSecondName(CREATE_SECOND_NAME);
@@ -83,7 +83,7 @@ class UserServiceTest {
     @Test
     @Transactional
     void createWrongEmail() {
-        UserDto userDto = new UserDto();
+        CreateOrUpdateUserDto userDto = new CreateOrUpdateUserDto();
         userDto.setUsername(CREATE_USERNAME);
         userDto.setFirstName(CREATE_FIRST_NAME);
         userDto.setSecondName(CREATE_SECOND_NAME);
@@ -224,6 +224,15 @@ class UserServiceTest {
         assertEquals("+3 (333) 567-8901", model.getPhoneNumber());
         assertEquals(false, model.getBlocked());
         assertEquals(false, model.getDeleted());
+    }
+
+    @Test
+    void findByFilterTest5() {
+        UserSearchModel modelWithTwoSearchFields = new UserSearchModel();
+
+        Page<UserModel> result = userService.findByFilter(modelWithTwoSearchFields);
+        assertNotNull(result);
+        assertEquals(8, result.getTotalElements());
     }
 
     @Test
