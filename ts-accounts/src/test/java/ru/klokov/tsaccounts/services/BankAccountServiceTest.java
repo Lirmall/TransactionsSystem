@@ -155,6 +155,16 @@ class BankAccountServiceTest {
     }
 
     @Test
+    void findByFilterWithCriteriaTes4() {
+        BankAccountSearchModel modelWithBalanceMoreAndDESCSort = new BankAccountSearchModel();
+
+        Page<BankAccountDto> result = bankAccountService.findByFilterWithCriteria(modelWithBalanceMoreAndDESCSort);
+        assertNotNull(result);
+        assertEquals(12, result.getTotalElements());
+
+    }
+
+    @Test
     void findByFilterWithCriteriaThrowValidExceptionTest() {
         BankAccountSearchModel modelWithWrongSortField = BankAccountSearchModelReturner.returnModelWithWrongSortField();
 
