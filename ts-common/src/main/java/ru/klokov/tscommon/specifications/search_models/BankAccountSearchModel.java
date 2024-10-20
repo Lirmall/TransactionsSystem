@@ -8,6 +8,7 @@ import lombok.Setter;
 import ru.klokov.tscommon.specifications.BaseSearchModel;
 import ru.klokov.tscommon.specifications.SearchCriteria;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -16,5 +17,5 @@ import java.util.List;
 @AllArgsConstructor
 @Schema(description = "Список критериев поиска")
 public class BankAccountSearchModel extends BaseSearchModel {
-    private List<SearchCriteria> criteriaList;
+    private List<SearchCriteria> criteriaList = new ArrayList<>();
 }

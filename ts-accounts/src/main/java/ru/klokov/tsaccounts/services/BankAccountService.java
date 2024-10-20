@@ -89,8 +89,12 @@ public class BankAccountService {
             Page<BankAccountEntity> entities = bankAccountRepository.findAll(builder.build(), pageable);
             return entities.map(bankAccountMapper::convertEntityToDTO);
         } else {
-            return Page.empty();
+            return findAllWithPageable(pageable).map(bankAccountMapper::convertEntityToDTO);
         }
+    }
+
+    private Page<BankAccountEntity> findAllWithPageable(Pageable pageable) {
+        return bankAccountRepository.findAll(pageable);
     }
 
     private BankAccountEntity privateFindById(Long id) {
