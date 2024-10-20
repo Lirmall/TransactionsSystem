@@ -16,7 +16,10 @@ import ru.klokov.tsaccounts.models.BankAccountModel;
 import ru.klokov.tsaccounts.services.BankAccountService;
 import ru.klokov.tscommon.dtos.BankAccountDto;
 import ru.klokov.tscommon.dtos.PagedResult;
-import ru.klokov.tscommon.requests.*;
+import ru.klokov.tscommon.requests.TransactionRequest;
+import ru.klokov.tscommon.requests.VerificationBalanceRequest;
+import ru.klokov.tscommon.requests.VerificationRequest;
+import ru.klokov.tscommon.requests.VerificationResponse;
 import ru.klokov.tscommon.specifications.search_models.BankAccountSearchModel;
 
 @Slf4j
@@ -84,18 +87,6 @@ public class BankAccountController {
         Page<BankAccountDto> dtos = bankAccountService.findByFilterWithCriteria(model);
         return new PagedResult<>(dtos);
     }
-
-//    @Operation(
-//            summary = "Find bank account by search criteria",
-//            method = "post")
-//    @ApiResponse(responseCode = "200", description = "Request successful")
-//    @ApiResponse(responseCode = "400", description = "Bad request")
-//    @ApiResponse(responseCode = "500", description = "Internal server error")
-//    @PostMapping("/find")
-//    public List<BankAccountDto> findByOwnerUser(@RequestBody BankAccountDto dto) {
-//        List<BankAccountModel> bankAccounts = bankAccountService.findBankAccountsByOwnerUser(dto.getOwnerUserId());
-//        return bankAccounts.stream().map(bankAccountMapper::convertModelToDTO).toList();
-//    }
 
     @Operation(
             summary = "Create new bank account",
