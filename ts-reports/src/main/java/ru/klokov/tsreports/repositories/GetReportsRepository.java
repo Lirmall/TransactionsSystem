@@ -31,7 +31,7 @@ public class GetReportsRepository {
 
     private final RestTemplate restTemplate;
 
-    public Page<TransactionDto> getTransactionsByPeriod(PeriodDto dto) {
+    public PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto dto) {
         String transactionDate = "transactionDate";
         SearchCriteria criteria1 = new SearchCriteria(transactionDate, SearchOperation.GREATER_THAN, dto.getPeriodStart().toString(), false);
         SearchCriteria criteria2 = new SearchCriteria(transactionDate, SearchOperation.LESS_THAN, dto.getPeriodEnd().toString(), false);
@@ -45,15 +45,10 @@ public class GetReportsRepository {
                 restTemplate.exchange(TRANSACTIONS_URL + FILTER, HttpMethod.POST, new HttpEntity<>(searchModel),typeReference).getBody();
         assert content != null;
 
-        List<TransactionDto> sortedContent = content.getContent().stream().sorted(Comparator.comparing(TransactionDto::getTransactionDate)).toList();
-
-        Sort sort = Sort.by(Sort.Direction.ASC, transactionDate);
-        Pageable pageable = PageRequest.of(content.getNumber(), content.getSize(), sort);
-
-        return new PageImpl<>(sortedContent, pageable, content.getTotalElements());
+        return content;
     }
 
-    public List<BankAccountDto> getBankAccounts(Collection<Long> bankAccountIds) {
+    public PagedResult<BankAccountDto> getBankAccounts(Collection<Long> bankAccountIds) {
         List<SearchCriteria> criteria = new ArrayList<>();
         bankAccountIds.forEach(id -> criteria.add(new SearchCriteria("id", SearchOperation.EQUALITY, id, true)));
 
@@ -65,10 +60,10 @@ public class GetReportsRepository {
                 restTemplate.exchange(BANK_ACCOUNTS_URL + FILTER, HttpMethod.POST, new HttpEntity<>(model), typeReference).getBody();
         assert result != null;
 
-        return result.getContent();
+        return result;
     }
 
-    public List<UserDto> getUsersByIds(Collection<Long> ids) {
+    public PagedResult<UserDto> getUsersByIds(Collection<Long> ids) {
         UserSearchModel model = new UserSearchModel();
         model.setIds(ids.stream().toList());
 
@@ -78,6 +73,6 @@ public class GetReportsRepository {
                 restTemplate.exchange(USERS_URL + FILTER, HttpMethod.POST, new HttpEntity<>(model), typeReference).getBody();
         assert result != null;
 
-        return result.getContent();
+        return result;
     }
 }

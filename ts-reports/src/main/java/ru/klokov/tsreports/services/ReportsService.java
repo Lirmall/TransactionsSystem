@@ -36,27 +36,27 @@ public class ReportsService {
 
         log.info("{}", periodDto.getPeriodEnd());
 
-        Page<TransactionDto> transactionDtoPage = getTransactionsByPeriod(periodDto);
+        PagedResult<TransactionDto> transactionDtoPage = getTransactionsByPeriod(periodDto);
 
-        List<BankAccountDto> bankAccountDtos = getBankAccountDtos(transactionDtoPage);
+        PagedResult<BankAccountDto> bankAccountDtos = getBankAccountDtos(transactionDtoPage);
 
-        List<UserDto> userDtos = getUsersData(bankAccountDtos);
+        PagedResult<UserDto> userDtos = getUsersData(bankAccountDtos);
 
         List<ReportEntity> entities = createReportEntities(transactionDtoPage, userDtos, bankAccountDtos);
 
-        log.info("transactions {}", transactionDtoPage.getNumberOfElements());
+        log.info("transactions {}", transactionDtoPage.getSize());
         log.info("transactions all {}", transactionDtoPage.getTotalElements());
         log.info("transactions pages {}", transactionDtoPage.getTotalPages());
-        log.info("users {}", userDtos.size());
+        log.info("users {}", userDtos.getSize());
         log.info("reports {}", entities.size());
 //        databaseRepository.saveAll(entities);
     }
 
-    private Page<TransactionDto> getTransactionsByPeriod(PeriodDto periodDto) {
+    private PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto periodDto) {
         return getReportsRepository.getTransactionsByPeriod(periodDto);
     }
 
-    private List<BankAccountDto> getBankAccountDtos(Page<TransactionDto> transactionDtoPage) {
+    private PagedResult<BankAccountDto> getBankAccountDtos(PagedResult<TransactionDto> transactionDtoPage) {
         Set<Long> bankAccountDtos = new HashSet<>();
 
         for (TransactionDto dto : transactionDtoPage.getContent()) {
@@ -67,29 +67,29 @@ public class ReportsService {
         return getReportsRepository.getBankAccounts(bankAccountDtos);
     }
 
-    private List<UserDto> getUsersData(List<BankAccountDto> bankAccountDtos) {
+    private PagedResult<UserDto> getUsersData(PagedResult<BankAccountDto> bankAccountDtos) {
         Set<Long> allAccountsIds = new HashSet<>();
 
-        bankAccountDtos.forEach(dto -> allAccountsIds.add(dto.getOwnerUserId()));
+        bankAccountDtos.getContent().forEach(dto -> allAccountsIds.add(dto.getOwnerUserId()));
 
-        List<UserDto> result = getReportsRepository.getUsersByIds(allAccountsIds);
+        PagedResult<UserDto> result = getReportsRepository.getUsersByIds(allAccountsIds);
 
         return result;
     }
 
-    private List<ReportEntity> createReportEntities(Page<TransactionDto> transactionDtos, List<UserDto> userDtos, List<BankAccountDto> bankAccountDtos) {
+    private List<ReportEntity> createReportEntities(PagedResult<TransactionDto> transactionDtos, PagedResult<UserDto> userDtos, PagedResult<BankAccountDto> bankAccountDtos) {
         List<ReportEntity> entities = new ArrayList<>();
 
-        for (TransactionDto transaction: transactionDtos) {
-            Optional<BankAccountDto> optSenderBA = bankAccountDtos.stream().filter(b -> b.getId().equals(transaction.getSenderId())).findFirst();
-            Optional<BankAccountDto> optRecBA = bankAccountDtos.stream().filter(b -> b.getId().equals(transaction.getRecipientId())).findFirst();
+        for (TransactionDto transaction: transactionDtos.getContent()) {
+            Optional<BankAccountDto> optSenderBA = bankAccountDtos.getContent().stream().filter(b -> b.getId().equals(transaction.getSenderId())).findFirst();
+            Optional<BankAccountDto> optRecBA = bankAccountDtos.getContent().stream().filter(b -> b.getId().equals(transaction.getRecipientId())).findFirst();
 
             if(optSenderBA.isEmpty() || optRecBA.isEmpty()) {
                 throw new RuntimeException("Sender or recipient bank account is empty");
             }
 
-            Optional<UserDto> optSender = userDtos.stream().filter(u -> u.getId().equals(optSenderBA.get().getOwnerUserId())).findFirst();
-            Optional<UserDto> optRecipient = userDtos.stream().filter(u -> u.getId().equals(optRecBA.get().getOwnerUserId())).findFirst();
+            Optional<UserDto> optSender = userDtos.getContent().stream().filter(u -> u.getId().equals(optSenderBA.get().getOwnerUserId())).findFirst();
+            Optional<UserDto> optRecipient = userDtos.getContent().stream().filter(u -> u.getId().equals(optRecBA.get().getOwnerUserId())).findFirst();
 
             if(optSender.isEmpty() || optRecipient.isEmpty()) {
                 throw new RuntimeException("Sender or recipient is empty");
