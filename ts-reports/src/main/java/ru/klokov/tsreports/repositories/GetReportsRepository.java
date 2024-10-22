@@ -31,13 +31,8 @@ public class GetReportsRepository {
 
     private final RestTemplate restTemplate;
 
-    public PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto dto) {
-        String transactionDate = "transactionDate";
-        SearchCriteria criteria1 = new SearchCriteria(transactionDate, SearchOperation.GREATER_THAN, dto.getPeriodStart().toString(), false);
-        SearchCriteria criteria2 = new SearchCriteria(transactionDate, SearchOperation.LESS_THAN, dto.getPeriodEnd().toString(), false);
-
-        TransactionSearchModel searchModel = new TransactionSearchModel(List.of(criteria1, criteria2));
-        searchModel.setSortColumn(transactionDate);
+    public PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto dto, Integer pageNumber, Integer pageSize) {
+        TransactionSearchModel searchModel = createTransactionSearchModel(dto, pageNumber, pageSize);
 
         ParameterizedTypeReference<PagedResult<TransactionDto>> typeReference = new ParameterizedTypeReference<>() {};
 
@@ -48,11 +43,25 @@ public class GetReportsRepository {
         return content;
     }
 
-    public PagedResult<BankAccountDto> getBankAccounts(Collection<Long> bankAccountIds) {
+    private TransactionSearchModel createTransactionSearchModel(PeriodDto dto, Integer pageNumber, Integer pageSize) {
+        String transactionDate = "transactionDate";
+        SearchCriteria criteria1 = new SearchCriteria(transactionDate, SearchOperation.GREATER_THAN, dto.getPeriodStart().toString(), false);
+        SearchCriteria criteria2 = new SearchCriteria(transactionDate, SearchOperation.LESS_THAN, dto.getPeriodEnd().toString(), false);
+
+        TransactionSearchModel searchModel = new TransactionSearchModel(List.of(criteria1, criteria2));
+        searchModel.setSortColumn(transactionDate);
+        searchModel.setLimit(pageSize);
+        searchModel.setPages(pageNumber);
+        return searchModel;
+    }
+
+    public PagedResult<BankAccountDto> getBankAccounts(Collection<Long> bankAccountIds, Integer pageNumber, Integer pageSize) {
         List<SearchCriteria> criteria = new ArrayList<>();
         bankAccountIds.forEach(id -> criteria.add(new SearchCriteria("id", SearchOperation.EQUALITY, id, true)));
 
         BankAccountSearchModel model = new BankAccountSearchModel(criteria);
+        model.setPages(pageNumber);
+        model.setLimit(pageSize);
 
         ParameterizedTypeReference<PagedResult<BankAccountDto>> typeReference = new ParameterizedTypeReference<>() {};
 
@@ -63,9 +72,11 @@ public class GetReportsRepository {
         return result;
     }
 
-    public PagedResult<UserDto> getUsersByIds(Collection<Long> ids) {
+    public PagedResult<UserDto> getUsersByIds(Collection<Long> ids, Integer pageNumber, Integer pageSize) {
         UserSearchModel model = new UserSearchModel();
         model.setIds(ids.stream().toList());
+        model.setPages(pageNumber);
+        model.setLimit(pageSize);
 
         ParameterizedTypeReference<PagedResult<UserDto>> typeReference = new ParameterizedTypeReference<>() {};
 

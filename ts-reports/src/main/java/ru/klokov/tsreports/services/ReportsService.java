@@ -36,13 +36,40 @@ public class ReportsService {
 
         log.info("{}", periodDto.getPeriodEnd());
 
-        PagedResult<TransactionDto> transactionDtoPage = getTransactionsByPeriod(periodDto);
+        int pageNumber = 0;
+        int pageSize = 20;
 
-        PagedResult<BankAccountDto> bankAccountDtos = getBankAccountDtos(transactionDtoPage);
+        PagedResult<TransactionDto> transactionDtoPage = getTransactionsByPeriod(periodDto, pageNumber, pageSize);
 
-        PagedResult<UserDto> userDtos = getUsersData(bankAccountDtos);
+        PagedResult<BankAccountDto> bankAccountDtos = getBankAccountDtos(transactionDtoPage, pageNumber, pageSize);
+
+        PagedResult<UserDto> userDtos = getUsersData(bankAccountDtos, pageNumber, pageSize);
 
         List<ReportEntity> entities = createReportEntities(transactionDtoPage, userDtos, bankAccountDtos);
+
+        for(int page = pageNumber + 1; page < transactionDtoPage.getTotalPages(); page++) {
+            PagedResult<TransactionDto> innerTransactionDtoPage = getTransactionsByPeriod(periodDto, page, pageSize);
+            PagedResult<BankAccountDto> innerBankAccountDtos = getBankAccountDtos(innerTransactionDtoPage, 0, pageSize);
+            PagedResult<UserDto> innerUserDtos = getUsersData(innerBankAccountDtos, 0, pageSize);
+            List<ReportEntity> innerEntities = createReportEntities2(innerTransactionDtoPage, userDtos, bankAccountDtos);
+
+            log.info("page {}", page);
+            log.info("inner transactions {}", innerTransactionDtoPage.getSize());
+            log.info("first transaction {}", innerTransactionDtoPage.getContent().get(0).getTransactionDate());
+            log.info("inner transactions all {}", innerTransactionDtoPage.getTotalElements());
+            log.info("inner transactions pages {}", innerTransactionDtoPage.getTotalPages());
+            log.info("first transaction sender BA id {}", innerTransactionDtoPage.getContent().get(0).getSenderId());
+            log.info("first transaction rec BA id {}", innerTransactionDtoPage.getContent().get(0).getRecipientId());
+            log.info("inner users {}", innerUserDtos.getSize());
+            log.info("inner reports {}", innerEntities.size());
+        }
+
+        while (pageNumber < transactionDtoPage.getTotalPages()) {
+            ++pageNumber;
+            transactionDtoPage = getTransactionsByPeriod(periodDto, pageNumber, pageSize);
+        }
+
+
 
         log.info("transactions {}", transactionDtoPage.getSize());
         log.info("transactions all {}", transactionDtoPage.getTotalElements());
@@ -52,11 +79,11 @@ public class ReportsService {
 //        databaseRepository.saveAll(entities);
     }
 
-    private PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto periodDto) {
-        return getReportsRepository.getTransactionsByPeriod(periodDto);
+    private PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto periodDto, Integer pageNumber, Integer pageSize) {
+        return getReportsRepository.getTransactionsByPeriod(periodDto, pageNumber, pageSize);
     }
 
-    private PagedResult<BankAccountDto> getBankAccountDtos(PagedResult<TransactionDto> transactionDtoPage) {
+    private PagedResult<BankAccountDto> getBankAccountDtos(PagedResult<TransactionDto> transactionDtoPage, Integer pageNumber, Integer pageSize) {
         Set<Long> bankAccountDtos = new HashSet<>();
 
         for (TransactionDto dto : transactionDtoPage.getContent()) {
@@ -64,15 +91,15 @@ public class ReportsService {
             bankAccountDtos.add(dto.getRecipientId());
         }
 
-        return getReportsRepository.getBankAccounts(bankAccountDtos);
+        return getReportsRepository.getBankAccounts(bankAccountDtos, pageNumber, pageSize);
     }
 
-    private PagedResult<UserDto> getUsersData(PagedResult<BankAccountDto> bankAccountDtos) {
+    private PagedResult<UserDto> getUsersData(PagedResult<BankAccountDto> bankAccountDtos, Integer pageNumber, Integer pageSize) {
         Set<Long> allAccountsIds = new HashSet<>();
 
         bankAccountDtos.getContent().forEach(dto -> allAccountsIds.add(dto.getOwnerUserId()));
 
-        PagedResult<UserDto> result = getReportsRepository.getUsersByIds(allAccountsIds);
+        PagedResult<UserDto> result = getReportsRepository.getUsersByIds(allAccountsIds, pageNumber, pageSize);
 
         return result;
     }
@@ -103,4 +130,53 @@ public class ReportsService {
 
         return entities;
     }
+
+    private List<ReportEntity> createReportEntities2(PagedResult<TransactionDto> transactionDtos, PagedResult<UserDto> userDtos, PagedResult<BankAccountDto> bankAccountDtos) {
+        List<ReportEntity> entities = new ArrayList<>();
+
+
+        for(TransactionDto transaction: transactionDtos.getContent()) {
+            BankAccountDto senderBA = findBankAccountDtoInPage(transactionDtos, bankAccountDtos, transaction.getSenderId());
+            BankAccountDto recipientBA = findBankAccountDtoInPage(transactionDtos, bankAccountDtos, transaction.getRecipientId());
+
+            UserDto sender = findUserDtoInPage(bankAccountDtos, userDtos, senderBA.getOwnerUserId());
+            UserDto recipient = findUserDtoInPage(bankAccountDtos, userDtos, recipientBA.getOwnerUserId());
+
+            entities.add(reportsMapper.convertDtosToReport(transaction, sender, recipient));
+        }
+
+        return entities;
+    }
+
+    private BankAccountDto findBankAccountDtoInPage(PagedResult<TransactionDto> transactions, PagedResult<BankAccountDto> dtos, Long bankAccountId) {
+        int pageNumber = 0;
+        PagedResult<BankAccountDto> innerDtos = dtos;
+
+        while (true) {
+            Optional<BankAccountDto> result = innerDtos.getContent().stream().filter(b -> b.getId().equals(bankAccountId)).findFirst();
+            if(result.isPresent()) {
+                return result.get();
+            } else {
+                pageNumber++;
+                innerDtos = getBankAccountDtos(transactions, pageNumber, 20);
+            }
+        }
+    }
+
+    private UserDto findUserDtoInPage(PagedResult<BankAccountDto> baDtos, PagedResult<UserDto> userDtos, Long id) {
+        int pageNumber = 0;
+        PagedResult<UserDto> innerDtos = userDtos;
+
+        while (true) {
+            Optional<UserDto> result = innerDtos.getContent().stream().filter(b -> b.getId().equals(id)).findFirst();
+            if(result.isPresent()) {
+                return result.get();
+            } else {
+                pageNumber++;
+                innerDtos = getUsersData(baDtos, pageNumber, 20);
+            }
+        }
+    }
+
+
 }
