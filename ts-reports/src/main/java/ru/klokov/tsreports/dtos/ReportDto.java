@@ -21,12 +21,12 @@ public class ReportDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private UUID id;
     private Long senderUserId;
-    private Long senderUserBankAccountId;
     private String senderUserUsername;
+    private Long senderUserBankAccountId;
     private Double amount;
     private Long recipientUserId;
-    private Long recipientUserBankAccountId;
     private String recipientUserUsername;
+    private Long recipientUserBankAccountId;
     private Long typeId;
     private String typeName;
     private Long statusId;

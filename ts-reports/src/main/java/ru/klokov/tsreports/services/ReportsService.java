@@ -3,15 +3,21 @@ package ru.klokov.tsreports.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tscommon.dtos.*;
+import ru.klokov.tscommon.specifications.search_models.BankAccountSearchModel;
+import ru.klokov.tsreports.dtos.ReportDto;
 import ru.klokov.tsreports.entities.ReportEntity;
 import ru.klokov.tsreports.mappers.ReportsMapper;
 import ru.klokov.tsreports.repositories.GetReportsRepository;
 import ru.klokov.tsreports.repositories.ReportsDatabaseRepository;
+import ru.klokov.tsreports.specifications.ReportSpecificationBuilder;
+import ru.klokov.tsreports.specifications.sort.ReportSortChecker;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
@@ -21,6 +27,7 @@ public class ReportsService {
     private final ReportsDatabaseRepository databaseRepository;
     private final GetReportsRepository getReportsRepository;
     private final ReportsMapper reportsMapper;
+    private final ReportSortChecker reportSortChecker;
 
     @Transactional
     public void fillAllOrNewReportsToDB() {
@@ -47,6 +54,8 @@ public class ReportsService {
 
         List<ReportEntity> entities = createReportEntities(transactionDtoPage, userDtos, bankAccountDtos);
 
+//        databaseRepository.saveAll(entities);
+
         for(int page = pageNumber + 1; page < transactionDtoPage.getTotalPages(); page++) {
             PagedResult<TransactionDto> innerTransactionDtoPage = getTransactionsByPeriod(periodDto, page, pageSize);
             PagedResult<BankAccountDto> innerBankAccountDtos = getBankAccountDtos(innerTransactionDtoPage, 0, pageSize);
@@ -62,6 +71,7 @@ public class ReportsService {
             log.info("first transaction rec BA id {}", innerTransactionDtoPage.getContent().get(0).getRecipientId());
             log.info("inner users {}", innerUserDtos.getSize());
             log.info("inner reports {}", innerEntities.size());
+            //        databaseRepository.saveAll(entities);
         }
 
         while (pageNumber < transactionDtoPage.getTotalPages()) {
@@ -178,5 +188,20 @@ public class ReportsService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public Page<ReportDto> findByFilterWithCriteria(BankAccountSearchModel model) {
+        Pageable pageable = reportSortChecker.getPageableAndSort(model);
 
+        if (!model.getCriteriaList().isEmpty()) {
+            ReportSpecificationBuilder builder = new ReportSpecificationBuilder(model.getCriteriaList());
+            Page<ReportEntity> entities = databaseRepository.findAll(builder.build(), pageable);
+            return entities.map(reportsMapper::convertEntityToDto);
+        } else {
+            return findAllWithPageable(pageable).map(reportsMapper::convertEntityToDto);
+        }
+    }
+
+    private Page<ReportEntity> findAllWithPageable(Pageable pageable) {
+        return databaseRepository.findAll(pageable);
+    }
 }

@@ -31,7 +31,7 @@ public interface PageableAndSortChecker {
                 this.columnCheck(sortColumn);
             }
         } else {
-            sortColumn = "id";
+            sortColumn = getDefaultSortColumn();
         }
 
         return Sort.by(sortDirection, sortColumn);
@@ -44,4 +44,8 @@ public interface PageableAndSortChecker {
     }
 
     List<String> getColumnMapping();
+
+    default String getDefaultSortColumn() {
+        return "id";
+    }
 }

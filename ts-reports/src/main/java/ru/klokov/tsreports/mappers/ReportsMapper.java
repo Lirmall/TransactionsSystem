@@ -18,7 +18,7 @@ public class ReportsMapper {
         return modelMapper.map(dto, ReportEntity.class);
     }
 
-    public ReportDto convertEntityToDtp (ReportDto entity) {
+    public ReportDto convertEntityToDto(ReportEntity entity) {
         return modelMapper.map(entity, ReportDto.class);
     }
 
