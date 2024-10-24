@@ -26,7 +26,10 @@ public class TransactionMapper {
     }
 
     public TransactionDto convertEntityToDto(TransactionEntity entity) {
-        return modelMapper.map(entity, TransactionDto.class);
+        TransactionDto dto = modelMapper.map(entity, TransactionDto.class);
+        dto.setTypeId(entity.getType().getId());
+        dto.setStatusId(entity.getStatus().getId());
+        return dto;
     }
 
     public TransactionEntity convertDtoToEntity(TransactionDto dto) {
