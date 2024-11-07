@@ -17,7 +17,6 @@ import ru.klokov.tsreports.specifications.ReportSpecificationBuilder;
 import ru.klokov.tsreports.specifications.sort.ReportSortChecker;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
@@ -46,23 +45,15 @@ public class ReportsService {
         int pageNumber = 0;
         int pageSize = 20;
 
-        PagedResult<TransactionDto> transactionDtoPage = getTransactionsByPeriod(periodDto, pageNumber, pageSize);
-
-        PagedResult<BankAccountDto> bankAccountDtos = getBankAccountDtos(transactionDtoPage, pageNumber, pageSize);
-
-        PagedResult<UserDto> userDtos = getUsersData(bankAccountDtos, pageNumber, pageSize);
-
-        List<ReportEntity> entities = createReportEntities(transactionDtoPage, userDtos, bankAccountDtos);
-
-//        databaseRepository.saveAll(entities);
-
-        for(int page = pageNumber + 1; page < transactionDtoPage.getTotalPages(); page++) {
-            PagedResult<TransactionDto> innerTransactionDtoPage = getTransactionsByPeriod(periodDto, page, pageSize);
+        PagedResult<TransactionDto> innerTransactionDtoPage;
+        int transactionPage = 0;
+        do {
+            innerTransactionDtoPage = getTransactionsByPeriod(periodDto, pageNumber, pageSize);
             PagedResult<BankAccountDto> innerBankAccountDtos = getBankAccountDtos(innerTransactionDtoPage, 0, pageSize);
             PagedResult<UserDto> innerUserDtos = getUsersData(innerBankAccountDtos, 0, pageSize);
-            List<ReportEntity> innerEntities = createReportEntities2(innerTransactionDtoPage, userDtos, bankAccountDtos);
+            List<ReportEntity> innerEntities = createReportEntities2(innerTransactionDtoPage, innerUserDtos, innerBankAccountDtos);
 
-            log.info("page {}", page);
+            log.info("page {}", pageNumber);
             log.info("inner transactions {}", innerTransactionDtoPage.getSize());
             log.info("first transaction {}", innerTransactionDtoPage.getContent().get(0).getTransactionDate());
             log.info("inner transactions all {}", innerTransactionDtoPage.getTotalElements());
@@ -71,22 +62,10 @@ public class ReportsService {
             log.info("first transaction rec BA id {}", innerTransactionDtoPage.getContent().get(0).getRecipientId());
             log.info("inner users {}", innerUserDtos.getSize());
             log.info("inner reports {}", innerEntities.size());
-            //        databaseRepository.saveAll(entities);
-        }
 
-        while (pageNumber < transactionDtoPage.getTotalPages()) {
-            ++pageNumber;
-            transactionDtoPage = getTransactionsByPeriod(periodDto, pageNumber, pageSize);
-        }
-
-
-
-        log.info("transactions {}", transactionDtoPage.getSize());
-        log.info("transactions all {}", transactionDtoPage.getTotalElements());
-        log.info("transactions pages {}", transactionDtoPage.getTotalPages());
-        log.info("users {}", userDtos.getSize());
-        log.info("reports {}", entities.size());
-//        databaseRepository.saveAll(entities);
+            pageNumber++;
+            databaseRepository.saveAll(innerEntities);
+        } while (transactionPage < innerTransactionDtoPage.getTotalPages());
     }
 
     private PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto periodDto, Integer pageNumber, Integer pageSize) {
@@ -160,9 +139,10 @@ public class ReportsService {
 
     private BankAccountDto findBankAccountDtoInPage(PagedResult<TransactionDto> transactions, PagedResult<BankAccountDto> dtos, Long bankAccountId) {
         int pageNumber = 0;
+        int totalPages = dtos.getTotalPages();
         PagedResult<BankAccountDto> innerDtos = dtos;
 
-        while (true) {
+        while (pageNumber < totalPages) {
             Optional<BankAccountDto> result = innerDtos.getContent().stream().filter(b -> b.getId().equals(bankAccountId)).findFirst();
             if(result.isPresent()) {
                 return result.get();
@@ -171,13 +151,15 @@ public class ReportsService {
                 innerDtos = getBankAccountDtos(transactions, pageNumber, 20);
             }
         }
+        throw new RuntimeException("Bank account not found");
     }
 
     private UserDto findUserDtoInPage(PagedResult<BankAccountDto> baDtos, PagedResult<UserDto> userDtos, Long id) {
         int pageNumber = 0;
+        int totalPages = userDtos.getTotalPages();
         PagedResult<UserDto> innerDtos = userDtos;
 
-        while (true) {
+        while (pageNumber < totalPages) {
             Optional<UserDto> result = innerDtos.getContent().stream().filter(b -> b.getId().equals(id)).findFirst();
             if(result.isPresent()) {
                 return result.get();
@@ -186,6 +168,7 @@ public class ReportsService {
                 innerDtos = getUsersData(baDtos, pageNumber, 20);
             }
         }
+        throw new RuntimeException("User not found");
     }
 
     @Transactional(readOnly = true)
