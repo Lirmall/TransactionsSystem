@@ -39,7 +39,7 @@ public interface PageableAndSortChecker {
 
     default void columnCheck(String sortColumn) {
         if(!getColumnMapping().contains(sortColumn)) {
-            throw new VerificationException(String.format("Sort field \"%s\" is not supported", sortColumn));
+            throw new VerificationException(String.format("Field \"%s\" is not supported", sortColumn));
         }
     }
 

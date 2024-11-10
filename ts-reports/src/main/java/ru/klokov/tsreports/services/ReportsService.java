@@ -43,7 +43,7 @@ public class ReportsService {
         log.info("{}", periodDto.getPeriodEnd());
 
         int pageNumber = 0;
-        int pageSize = 20;
+        int pageSize = 20000;
 
         PagedResult<TransactionDto> innerTransactionDtoPage;
         int transactionPage = 0;
@@ -52,6 +52,10 @@ public class ReportsService {
             PagedResult<BankAccountDto> innerBankAccountDtos = getBankAccountDtos(innerTransactionDtoPage, 0, pageSize);
             PagedResult<UserDto> innerUserDtos = getUsersData(innerBankAccountDtos, 0, pageSize);
             List<ReportEntity> innerEntities = createReportEntities2(innerTransactionDtoPage, innerUserDtos, innerBankAccountDtos);
+
+            if(innerTransactionDtoPage.getContent().isEmpty()) {
+                break;
+            }
 
             log.info("page {}", pageNumber);
             log.info("inner transactions {}", innerTransactionDtoPage.getSize());
@@ -174,6 +178,8 @@ public class ReportsService {
     @Transactional(readOnly = true)
     public Page<ReportDto> findByFilterWithCriteria(BankAccountSearchModel model) {
         Pageable pageable = reportSortChecker.getPageableAndSort(model);
+
+        model.getCriteriaList().forEach(criteria -> reportSortChecker.columnCheck(criteria.getFieldName()));
 
         if (!model.getCriteriaList().isEmpty()) {
             ReportSpecificationBuilder builder = new ReportSpecificationBuilder(model.getCriteriaList());

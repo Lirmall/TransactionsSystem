@@ -84,6 +84,8 @@ public class BankAccountService {
     public Page<BankAccountDto> findByFilterWithCriteria(BankAccountSearchModel model) {
         Pageable pageable = bankAccountSortChecker.getPageableAndSort(model);
 
+        model.getCriteriaList().forEach(criteria -> bankAccountSortChecker.columnCheck(criteria.getFieldName()));
+
         if (!model.getCriteriaList().isEmpty()) {
             BankAccountSpecificationBuilder builder = new BankAccountSpecificationBuilder(model.getCriteriaList());
             Page<BankAccountEntity> entities = bankAccountRepository.findAll(builder.build(), pageable);

@@ -68,6 +68,7 @@ public class TransactionsService {
     @Transactional
     public Page<TransactionDto> findByFilterWithCriteria(TransactionSearchModel searchModel) {
         PageRequest pageable = sortChecker.getPageableAndSort(searchModel);
+        searchModel.getCriteriaList().forEach(criteria -> sortChecker.columnCheck(criteria.getFieldName()));
 
         if(!searchModel.getCriteriaList().isEmpty()) {
             TransactionSpecificationBuilder builder = new TransactionSpecificationBuilder(searchModel.getCriteriaList());
