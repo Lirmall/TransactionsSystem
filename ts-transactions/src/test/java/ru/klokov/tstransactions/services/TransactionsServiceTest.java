@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tscommon.dtos.TransactionDataDto;
+import ru.klokov.tscommon.specifications.SearchCriteria;
+import ru.klokov.tscommon.specifications.SearchOperation;
 import ru.klokov.tstransactions.config.TestContainerConfExtension;
 import ru.klokov.tscommon.dtos.TransactionDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
@@ -107,6 +109,23 @@ class TransactionsServiceTest {
     @Test
     void findByFilterWithCriteriaTest() {
         TransactionSearchModel modelWithOneId = TransactionSearchModelReturner.returnModelWithOneId();
+
+        Page<TransactionDto> result = transactionsService.findByFilterWithCriteria(modelWithOneId);
+        assertNotNull(result);
+
+        assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void findByFilterWithCriteriaFindByIdTest() {
+        SearchCriteria criteria = new SearchCriteria();
+        TransactionSearchModel modelWithOneId = new TransactionSearchModel();
+
+        criteria.setFieldName("id");
+        criteria.setSearchOperation(SearchOperation.EQUALITY);
+        criteria.setFieldValue("65833767-1827-4e1e-85ad-c7224290b798");
+
+        modelWithOneId.setCriteriaList(Collections.singletonList(criteria));
 
         Page<TransactionDto> result = transactionsService.findByFilterWithCriteria(modelWithOneId);
         assertNotNull(result);

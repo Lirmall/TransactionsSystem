@@ -11,6 +11,7 @@ import ru.klokov.tsreports.entities.ReportEntity;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @AllArgsConstructor
 public class ReportSpecification implements Specification<ReportEntity> {
@@ -21,6 +22,10 @@ public class ReportSpecification implements Specification<ReportEntity> {
 
         if(criteria.getFieldValue() instanceof LocalDateTime || criteria.getFieldName().equals("transactionDate")) {
             return localDateTimeHandler(criteria.getFieldValue(), root, query, criteriaBuilder);
+        }
+
+        if(criteria.getFieldValue() instanceof UUID || criteria.getFieldName().equals("id")) {
+            return uuidHandler(criteria.getFieldValue(), root, query, criteriaBuilder);
         }
 
         switch (criteria.getSearchOperation()) {
@@ -54,6 +59,24 @@ public class ReportSpecification implements Specification<ReportEntity> {
                 return criteriaBuilder.lessThanOrEqualTo(root.get(fieldName), dateTimeValue);
             case EQUALITY:
                 return criteriaBuilder.equal(root.get(fieldName), dateTimeValue);
+            default:
+                return null;
+        }
+    }
+
+    private Predicate uuidHandler(Object id, Root<ReportEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+        UUID uuidValue;
+
+        if(id instanceof UUID) {
+            uuidValue = (UUID) id;
+        } else {
+            uuidValue = UUID.fromString((String) id);
+        }
+        String fieldName = criteria.getFieldName();
+
+        switch (criteria.getSearchOperation()) {
+            case EQUALITY:
+                return criteriaBuilder.equal(root.get(fieldName), uuidValue);
             default:
                 return null;
         }
