@@ -69,12 +69,18 @@ public class ReportsService {
             log.info("inner users {}", innerUserDtos.getSize());
             log.info("inner reports {}", innerEntities.size());
 
+            log.info("Save {} list of reports", pageNumber );
             pageNumber++;
-            databaseRepository.saveAll(innerEntities);
+            saveListOfReports(innerEntities);
         } while (transactionPage < innerTransactionDtoPage.getTotalPages());
 
         log.info("Fill reports to DB ends at {}", LocalDateTime.now());
         log.info("Method works {} milliseconds", System.currentTimeMillis() - startTime);
+    }
+
+    private void saveListOfReports(List<ReportEntity> reportEntities) {
+        databaseRepository.saveAll(reportEntities);
+        log.info("Saved!");
     }
 
     private PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto periodDto, Integer pageNumber, Integer pageSize) {
