@@ -30,6 +30,8 @@ public class ReportsService {
 
     @Transactional
     public void fillAllOrNewReportsToDB() {
+        long startTime = System.currentTimeMillis();
+        log.info("Fill reports to DB starts at {}", LocalDateTime.now());
         PeriodDto periodDto = new PeriodDto();
         Optional<LocalDateTime> optionalLastReportDate = databaseRepository.getReportEntityWithMaxTransactionDate();
 
@@ -43,7 +45,7 @@ public class ReportsService {
         log.info("{}", periodDto.getPeriodEnd());
 
         int pageNumber = 0;
-        int pageSize = 20000;
+        int pageSize = 2000;
 
         PagedResult<TransactionDto> innerTransactionDtoPage;
         int transactionPage = 0;
@@ -70,6 +72,9 @@ public class ReportsService {
             pageNumber++;
             databaseRepository.saveAll(innerEntities);
         } while (transactionPage < innerTransactionDtoPage.getTotalPages());
+
+        log.info("Fill reports to DB ends at {}", LocalDateTime.now());
+        log.info("Method works {} milliseconds", System.currentTimeMillis() - startTime);
     }
 
     private PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto periodDto, Integer pageNumber, Integer pageSize) {
