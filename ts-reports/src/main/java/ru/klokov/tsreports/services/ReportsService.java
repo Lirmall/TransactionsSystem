@@ -28,7 +28,6 @@ public class ReportsService {
     private final ReportsMapper reportsMapper;
     private final ReportSortChecker reportSortChecker;
 
-    @Transactional
     public void fillAllOrNewReportsToDB() {
         long startTime = System.currentTimeMillis();
         log.info("Fill reports to DB starts at {}", LocalDateTime.now());
@@ -78,9 +77,18 @@ public class ReportsService {
         log.info("Method works {} milliseconds", System.currentTimeMillis() - startTime);
     }
 
-    private void saveListOfReports(List<ReportEntity> reportEntities) {
-        databaseRepository.saveAll(reportEntities);
-        log.info("Saved!");
+    @Transactional
+    protected void saveListOfReports(List<ReportEntity> reportEntities) {
+        Random random = new Random();
+        int randomNumber = random.nextInt(5);
+        log.info("random number is {}", randomNumber);
+        if (randomNumber == 1) {
+            log.warn("Try to fail");
+            throw new RuntimeException("Fail to record");
+        }
+
+            databaseRepository.saveAll(reportEntities);
+            log.info("Saved!");
     }
 
     private PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto periodDto, Integer pageNumber, Integer pageSize) {
