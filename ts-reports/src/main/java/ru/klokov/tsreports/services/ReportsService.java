@@ -77,7 +77,7 @@ public class ReportsService {
         log.info("Method works {} milliseconds", System.currentTimeMillis() - startTime);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     protected void saveListOfReports(List<ReportEntity> reportEntities) {
         Random random = new Random();
         int randomNumber = random.nextInt(5);
