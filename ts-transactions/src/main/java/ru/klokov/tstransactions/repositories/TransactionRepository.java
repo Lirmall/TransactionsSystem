@@ -12,6 +12,6 @@ import java.util.UUID;
 public interface TransactionRepository extends JpaRepository<TransactionEntity, UUID>, JpaSpecificationExecutor<TransactionEntity> {
 
     @Modifying
-    @Query(value = "truncate table transactions.transactions;", nativeQuery = true)
+    @Query(value = "delete from transactions.transactions;", nativeQuery = true)
     void truncateTransactions();
 }
