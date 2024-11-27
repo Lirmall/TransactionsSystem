@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 import ru.klokov.tscommon.dtos.PagedResult;
 import ru.klokov.tscommon.specifications.search_models.BankAccountSearchModel;
@@ -39,5 +40,27 @@ public class ReportsController {
     public PagedResult<ReportDto> findByFilter(@RequestBody BankAccountSearchModel model) {
         Page<ReportDto> dtos = reportsService.findByFilterWithCriteria(model);
         return new PagedResult<>(dtos);
+    }
+
+    @Operation(
+            summary = "Clear all reports in DB",
+            method = "post")
+    @ApiResponse(responseCode = "200", description = "Request successful")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @GetMapping("/clear")
+    public void clearAllReportsInDB() {
+        reportsService.clearReports();
+    }
+
+    @Operation(
+            summary = "Get all or new reports data to DB with concurrent",
+            method = "post")
+    @ApiResponse(responseCode = "200", description = "Request successful")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @GetMapping("/concurrent")
+    public void fillAllOrNewReportsToDBWithConcurrent(@RequestParam @Nullable Integer pageSize, @RequestParam @Nullable Integer threadsCount) {
+        reportsService.concurrentFillAllOrNewReportsToDB(pageSize, threadsCount);
     }
 }

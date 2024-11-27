@@ -2,6 +2,7 @@ package ru.klokov.tsreports.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import ru.klokov.tsreports.entities.ReportEntity;
 
@@ -12,4 +13,8 @@ import java.util.UUID;
 public interface ReportsDatabaseRepository extends JpaRepository<ReportEntity, UUID>, JpaSpecificationExecutor<ReportEntity> {
     @Query(value = "select max(rr.transaction_date) from reports.reports rr", nativeQuery = true)
     Optional<LocalDateTime> getReportEntityWithMaxTransactionDate();
+
+    @Modifying
+    @Query(value = "delete from reports.reports;", nativeQuery = true)
+    void truncateReports();
 }

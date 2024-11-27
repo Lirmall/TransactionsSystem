@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tscommon.dtos.*;
@@ -18,6 +19,11 @@ import ru.klokov.tsreports.specifications.sort.ReportSortChecker;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Service
@@ -70,13 +76,112 @@ public class ReportsService {
 
             log.info("Save {} list of reports", pageNumber );
             pageNumber++;
-            saveListOfReports(innerEntities);
+
+            try {
+                saveListOfReports(innerEntities);
+            }catch (Exception e) {
+                log.error(e.getMessage());
+            }
         } while (transactionPage < innerTransactionDtoPage.getTotalPages());
 
         log.info("Fill reports to DB ends at {}", LocalDateTime.now());
         log.info("Method works {} milliseconds", System.currentTimeMillis() - startTime);
     }
 
+    public void concurrentFillAllOrNewReportsToDB(@Nullable Integer pageSize, @Nullable Integer threadsCount) {
+        long startTime = System.currentTimeMillis();
+        log.info("Fill reports to DB with concurrent starts at {}", LocalDateTime.now());
+        PeriodDto periodDto = new PeriodDto();
+        Optional<LocalDateTime> optionalLastReportDate = databaseRepository.getReportEntityWithMaxTransactionDate();
+
+        LocalDateTime lastReportDate = optionalLastReportDate.orElse(LocalDateTime.of(1970, 1, 1, 0, 0, 0, 1));
+
+        log.info("{}", lastReportDate);
+
+        periodDto.setPeriodStart(lastReportDate);
+        periodDto.setPeriodEnd(LocalDateTime.now().minusDays(1L).withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+
+        log.info("{}", periodDto.getPeriodEnd());
+
+        int pageNumber = 0;
+        int innerPageSize = pageSize == null ? 2000 : pageSize;
+
+        PagedResult<TransactionDto> firstPage = getTransactionsByPeriod(periodDto, pageNumber, innerPageSize);
+        int transactionPage = 0;
+        int totalPages = firstPage.getTotalPages();
+
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        log.info("Available processors {}", totalPages);
+
+        if(threadsCount == null || threadsCount > availableProcessors) {
+            threadsCount = availableProcessors;
+        }
+
+        log.info("Threads {}", threadsCount);
+
+        ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
+
+        List<Future<Void>> futures = new ArrayList<>();
+
+        AtomicLong maxEndTimeMillis = new AtomicLong();
+
+        for (int page = 0; page < totalPages; page++) {
+            int finalPageNumber = page;
+            Future<Void> future = executor.submit(() -> {
+
+                PagedResult<TransactionDto> innerTransactionDtoPage = getTransactionsByPeriod(periodDto, finalPageNumber, innerPageSize);
+                PagedResult<BankAccountDto> innerBankAccountDtos = getBankAccountDtos(innerTransactionDtoPage, 0, innerPageSize);
+                PagedResult<UserDto> innerUserDtos = getUsersData(innerBankAccountDtos, 0, innerPageSize);
+
+                List<ReportEntity> innerEntities = createReportEntities2(innerTransactionDtoPage, innerUserDtos, innerBankAccountDtos);
+
+                if (!innerEntities.isEmpty()) {
+                    log.info("Save {} reports from page {}", innerEntities.size(), finalPageNumber);
+                    saveListOfReports(innerEntities);
+                }
+
+                maxEndTimeMillis.updateAndGet(currentMax -> Math.max(currentMax, System.currentTimeMillis()));
+                log.info(maxEndTimeMillis.toString());
+                return null;  // Возвращаем null, так как результат не нужен
+            });
+
+            futures.add(future);
+        }
+
+        try {
+            for (Future<Void> future : futures) {
+                future.get();  // Ожидаем выполнения каждой задачи
+            }
+
+            log.info("Fill reports to DB with concurrent ends at {} futures cycle ", LocalDateTime.now());
+            log.info("Method with concurrent works {} milliseconds", System.currentTimeMillis() - startTime);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Error during parallel task execution", e);
+        } finally {
+            executor.shutdown();  // Завершаем работу пула потоков
+            try {
+                // Логируем каждые 2 секунды (можно настроить по вашему усмотрению)
+                Thread.sleep(100);
+                long remainingTime = System.currentTimeMillis() - startTime;
+                log.info("Waiting for threads to finish... {} ms elapsed", remainingTime);
+            } catch (InterruptedException e) {
+                log.error("Error during waiting for threads to finish", e);
+            }
+
+            log.info("Fill reports to DB with concurrent ends at {} 1", LocalDateTime.now());
+            log.info("Method with concurrent works {} milliseconds", System.currentTimeMillis() - startTime);
+
+        }
+
+        
+
+        log.info("Fill reports to DB with concurrent ends at {} ", LocalDateTime.now());
+        log.info("Method with concurrent works {} milliseconds", System.currentTimeMillis() - startTime);
+
+        log.info("Method with concurrent works {} milliseconds (new)", maxEndTimeMillis.get() - startTime);
+    }
+
+    //но вроде как такое поведение идет по-умолчанию
     @Transactional(rollbackFor = RuntimeException.class)
     protected void saveListOfReports(List<ReportEntity> reportEntities) {
         Random random = new Random();
@@ -89,6 +194,12 @@ public class ReportsService {
 
             databaseRepository.saveAll(reportEntities);
             log.info("Saved!");
+    }
+
+    @Transactional
+    public void clearReports() {
+//        databaseRepository.deleteAll();
+        databaseRepository.truncateReports();
     }
 
     private PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto periodDto, Integer pageNumber, Integer pageSize) {
