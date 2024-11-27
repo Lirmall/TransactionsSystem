@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.klokov.tscommon.dtos.PagedResult;
 import ru.klokov.tscommon.dtos.TransactionDto;
 import ru.klokov.tscommon.specifications.search_models.TransactionSearchModel;
+import ru.klokov.tstransactions.dtos.GeneratorDto;
 import ru.klokov.tstransactions.mappers.TransactionMapper;
+import ru.klokov.tstransactions.services.TransactionGenerator;
 import ru.klokov.tstransactions.services.TransactionsService;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @Slf4j
@@ -21,6 +24,7 @@ import java.util.UUID;
 public class TransactionController {
     private final TransactionsService transactionsService;
     private final TransactionMapper transactionMapper;
+    private final TransactionGenerator transactionGenerator;
 
     @Operation(
             summary = "Create new transaction",
@@ -54,5 +58,29 @@ public class TransactionController {
     public PagedResult<TransactionDto> findByFilter(@RequestBody TransactionSearchModel model) {
         Page<TransactionDto> dtos = transactionsService.findByFilterWithCriteria(model);
         return new PagedResult<>(dtos);
+    }
+
+    @Operation(
+            summary = "Generate random transactions",
+            method = "post")
+    @ApiResponse(responseCode = "200", description = "Request successful")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @PostMapping("/generate")
+    public void generate(@RequestBody GeneratorDto model) throws IOException {
+        transactionGenerator.transactionGenerate(model.getStart(), model.getEnd(), model.getCount());
+    }
+
+
+
+    @Operation(
+            summary = "Clear all transactions in DB",
+            method = "post")
+    @ApiResponse(responseCode = "200", description = "Request successful")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @GetMapping("/clear")
+    public void clear() {
+        transactionsService.clearTransactions();
     }
 }

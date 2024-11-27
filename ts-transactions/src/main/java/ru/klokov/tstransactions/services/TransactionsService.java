@@ -106,4 +106,8 @@ public class TransactionsService {
 
         log.info("All transaction's data is verified");
     }
+
+    public void clearTransactions() {
+        transactionRepository.truncateTransactions();
+    }
 }
