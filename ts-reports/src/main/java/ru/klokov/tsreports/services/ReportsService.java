@@ -19,10 +19,7 @@ import ru.klokov.tsreports.specifications.sort.ReportSortChecker;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
@@ -52,15 +49,18 @@ public class ReportsService {
         int pageNumber = 0;
         int pageSize = 2000;
 
+        ConcurrentHashMap<Long, BankAccountDto> bankAccountDtoCacheMap = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Long, UserDto> userDtoCacheMap = new ConcurrentHashMap<>();
+
         PagedResult<TransactionDto> innerTransactionDtoPage;
         int transactionPage = 0;
         do {
             innerTransactionDtoPage = getTransactionsByPeriod(periodDto, pageNumber, pageSize);
             PagedResult<BankAccountDto> innerBankAccountDtos = getBankAccountDtos(innerTransactionDtoPage, 0, pageSize);
             PagedResult<UserDto> innerUserDtos = getUsersData(innerBankAccountDtos, 0, pageSize);
-            List<ReportEntity> innerEntities = createReportEntities2(innerTransactionDtoPage, innerUserDtos, innerBankAccountDtos);
+            List<ReportEntity> innerEntities = createReportEntities2(innerTransactionDtoPage, innerUserDtos, innerBankAccountDtos, bankAccountDtoCacheMap, userDtoCacheMap);
 
-            if(innerTransactionDtoPage.getContent().isEmpty()) {
+            if (innerTransactionDtoPage.getContent().isEmpty()) {
                 break;
             }
 
@@ -74,12 +74,12 @@ public class ReportsService {
             log.info("inner users {}", innerUserDtos.getSize());
             log.info("inner reports {}", innerEntities.size());
 
-            log.info("Save {} list of reports", pageNumber );
+            log.info("Save {} list of reports", pageNumber);
             pageNumber++;
 
             try {
                 saveListOfReports(innerEntities);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 log.error(e.getMessage());
             }
         } while (transactionPage < innerTransactionDtoPage.getTotalPages());
@@ -113,7 +113,7 @@ public class ReportsService {
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         log.info("Available processors {}", totalPages);
 
-        if(threadsCount == null || threadsCount > availableProcessors) {
+        if (threadsCount == null || threadsCount > availableProcessors) {
             threadsCount = availableProcessors;
         }
 
@@ -125,6 +125,10 @@ public class ReportsService {
 
         AtomicLong maxEndTimeMillis = new AtomicLong();
 
+        ConcurrentHashMap<Long, BankAccountDto> bankAccountDtoCacheMap = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Long, UserDto> userDtoCacheMap = new ConcurrentHashMap<>();
+        CountDownLatch latch = new CountDownLatch(totalPages);
+
         for (int page = 0; page < totalPages; page++) {
             int finalPageNumber = page;
             Future<Void> future = executor.submit(() -> {
@@ -133,15 +137,15 @@ public class ReportsService {
                 PagedResult<BankAccountDto> innerBankAccountDtos = getBankAccountDtos(innerTransactionDtoPage, 0, innerPageSize);
                 PagedResult<UserDto> innerUserDtos = getUsersData(innerBankAccountDtos, 0, innerPageSize);
 
-                List<ReportEntity> innerEntities = createReportEntities2(innerTransactionDtoPage, innerUserDtos, innerBankAccountDtos);
+                List<ReportEntity> innerEntities = createReportEntities2(innerTransactionDtoPage, innerUserDtos, innerBankAccountDtos, bankAccountDtoCacheMap, userDtoCacheMap);
 
                 if (!innerEntities.isEmpty()) {
                     log.info("Save {} reports from page {}", innerEntities.size(), finalPageNumber);
-                    saveListOfReports(innerEntities);
+                    saveListOfReportsWithTime(innerEntities, latch);
                 }
 
                 maxEndTimeMillis.updateAndGet(currentMax -> Math.max(currentMax, System.currentTimeMillis()));
-                log.info(maxEndTimeMillis.toString());
+                log.info("max end time millis is {}", maxEndTimeMillis);
                 return null;  // Возвращаем null, так как результат не нужен
             });
 
@@ -152,7 +156,7 @@ public class ReportsService {
             for (Future<Void> future : futures) {
                 future.get();  // Ожидаем выполнения каждой задачи
             }
-
+            latch.await();
             log.info("Fill reports to DB with concurrent ends at {} futures cycle ", LocalDateTime.now());
             log.info("Method with concurrent works {} milliseconds", System.currentTimeMillis() - startTime);
         } catch (InterruptedException | ExecutionException e) {
@@ -160,6 +164,8 @@ public class ReportsService {
         } finally {
             executor.shutdown();  // Завершаем работу пула потоков
             try {
+                latch.await();
+                log.info("latch count {} from main concurrent method", latch.getCount());
                 // Логируем каждые 2 секунды (можно настроить по вашему усмотрению)
                 Thread.sleep(100);
                 long remainingTime = System.currentTimeMillis() - startTime;
@@ -173,12 +179,10 @@ public class ReportsService {
 
         }
 
-        
-
         log.info("Fill reports to DB with concurrent ends at {} ", LocalDateTime.now());
         log.info("Method with concurrent works {} milliseconds", System.currentTimeMillis() - startTime);
 
-        log.info("Method with concurrent works {} milliseconds (new)", maxEndTimeMillis.get() - startTime);
+        log.info("Method with concurrent works {} milliseconds (new), end time is {}", maxEndTimeMillis.get() - startTime, maxEndTimeMillis);
     }
 
     //но вроде как такое поведение идет по-умолчанию
@@ -192,14 +196,34 @@ public class ReportsService {
             throw new RuntimeException("Fail to record");
         }
 
-            databaseRepository.saveAll(reportEntities);
-            log.info("Saved!");
+        databaseRepository.saveAll(reportEntities);
+        log.info("Saved!");
+    }
+
+    //но вроде как такое поведение идет по-умолчанию
+    @Transactional(rollbackFor = RuntimeException.class)
+    protected void saveListOfReportsWithTime(List<ReportEntity> reportEntities, CountDownLatch latch) {
+        Random random = new Random();
+        int randomNumber = random.nextInt(5);
+        log.info("random number is {}", randomNumber);
+        if (randomNumber == 1) {
+            log.warn("Try to fail");
+            latch.countDown();
+            log.info("latch {}", latch.getCount());
+            throw new RuntimeException("Fail to record");
+        }
+
+        databaseRepository.saveAll(reportEntities);
+        log.info("Saved!");
+        latch.countDown();
+        log.info("latch {}", latch.getCount());
     }
 
     @Transactional
     public void clearReports() {
 //        databaseRepository.deleteAll();
         databaseRepository.truncateReports();
+        log.info("Reports DB cleared");
     }
 
     private PagedResult<TransactionDto> getTransactionsByPeriod(PeriodDto periodDto, Integer pageNumber, Integer pageSize) {
@@ -230,18 +254,18 @@ public class ReportsService {
     private List<ReportEntity> createReportEntities(PagedResult<TransactionDto> transactionDtos, PagedResult<UserDto> userDtos, PagedResult<BankAccountDto> bankAccountDtos) {
         List<ReportEntity> entities = new ArrayList<>();
 
-        for (TransactionDto transaction: transactionDtos.getContent()) {
+        for (TransactionDto transaction : transactionDtos.getContent()) {
             Optional<BankAccountDto> optSenderBA = bankAccountDtos.getContent().stream().filter(b -> b.getId().equals(transaction.getSenderId())).findFirst();
             Optional<BankAccountDto> optRecBA = bankAccountDtos.getContent().stream().filter(b -> b.getId().equals(transaction.getRecipientId())).findFirst();
 
-            if(optSenderBA.isEmpty() || optRecBA.isEmpty()) {
+            if (optSenderBA.isEmpty() || optRecBA.isEmpty()) {
                 throw new RuntimeException("Sender or recipient bank account is empty");
             }
 
             Optional<UserDto> optSender = userDtos.getContent().stream().filter(u -> u.getId().equals(optSenderBA.get().getOwnerUserId())).findFirst();
             Optional<UserDto> optRecipient = userDtos.getContent().stream().filter(u -> u.getId().equals(optRecBA.get().getOwnerUserId())).findFirst();
 
-            if(optSender.isEmpty() || optRecipient.isEmpty()) {
+            if (optSender.isEmpty() || optRecipient.isEmpty()) {
                 throw new RuntimeException("Sender or recipient is empty");
             }
 
@@ -254,21 +278,34 @@ public class ReportsService {
         return entities;
     }
 
-    private List<ReportEntity> createReportEntities2(PagedResult<TransactionDto> transactionDtos, PagedResult<UserDto> userDtos, PagedResult<BankAccountDto> bankAccountDtos) {
+    private List<ReportEntity> createReportEntities2(PagedResult<TransactionDto> transactionDtos, PagedResult<UserDto> userDtos, PagedResult<BankAccountDto> bankAccountDtos,
+                                                     ConcurrentHashMap<Long, BankAccountDto> bankAccountDtosCache, ConcurrentHashMap<Long, UserDto> userDtosCache) {
         List<ReportEntity> entities = new ArrayList<>();
 
 
-        for(TransactionDto transaction: transactionDtos.getContent()) {
-            BankAccountDto senderBA = findBankAccountDtoInPage(transactionDtos, bankAccountDtos, transaction.getSenderId());
-            BankAccountDto recipientBA = findBankAccountDtoInPage(transactionDtos, bankAccountDtos, transaction.getRecipientId());
+        for (TransactionDto transaction : transactionDtos.getContent()) {
+            BankAccountDto senderBA = findBankAccountDtoInPageWithCache(transactionDtos, bankAccountDtos, transaction.getSenderId(), bankAccountDtosCache);
+            BankAccountDto recipientBA = findBankAccountDtoInPageWithCache(transactionDtos, bankAccountDtos, transaction.getRecipientId(), bankAccountDtosCache);
 
-            UserDto sender = findUserDtoInPage(bankAccountDtos, userDtos, senderBA.getOwnerUserId());
-            UserDto recipient = findUserDtoInPage(bankAccountDtos, userDtos, recipientBA.getOwnerUserId());
+            UserDto sender = findUserDtoInPageWithCacheMap(bankAccountDtos, userDtos, senderBA.getOwnerUserId(), userDtosCache);
+            UserDto recipient = findUserDtoInPageWithCacheMap(bankAccountDtos, userDtos, recipientBA.getOwnerUserId(), userDtosCache);
 
             entities.add(reportsMapper.convertDtosToReport(transaction, sender, recipient));
         }
 
         return entities;
+    }
+
+    private BankAccountDto findBankAccountDtoInPageWithCache(PagedResult<TransactionDto> transactions, PagedResult<BankAccountDto> dtos, Long bankAccountId, Map<Long, BankAccountDto> bankAccountDtosCache) {
+        if (bankAccountDtosCache.containsKey(bankAccountId)) {
+//            log.info("Bank account with id {} found in cache", bankAccountId);
+            return bankAccountDtosCache.get(bankAccountId);
+        } else {
+            BankAccountDto result = findBankAccountDtoInPage(transactions, dtos, bankAccountId);
+            bankAccountDtosCache.put(bankAccountId, result);
+            log.info("Bank account with id {} get from rest query and added to cache. Cache size is {}", bankAccountId, bankAccountDtosCache.keySet().size());
+            return result;
+        }
     }
 
     private BankAccountDto findBankAccountDtoInPage(PagedResult<TransactionDto> transactions, PagedResult<BankAccountDto> dtos, Long bankAccountId) {
@@ -278,7 +315,7 @@ public class ReportsService {
 
         while (pageNumber < totalPages) {
             Optional<BankAccountDto> result = innerDtos.getContent().stream().filter(b -> b.getId().equals(bankAccountId)).findFirst();
-            if(result.isPresent()) {
+            if (result.isPresent()) {
                 return result.get();
             } else {
                 pageNumber++;
@@ -288,6 +325,17 @@ public class ReportsService {
         throw new RuntimeException("Bank account not found");
     }
 
+    private UserDto findUserDtoInPageWithCacheMap(PagedResult<BankAccountDto> baDtos, PagedResult<UserDto> userDtos, Long id, ConcurrentHashMap<Long, UserDto> userDtosCache) {
+        if (userDtosCache.containsKey(id)) {
+            return userDtosCache.get(id);
+        } else {
+            UserDto result = findUserDtoInPage(baDtos, userDtos, id);
+            userDtosCache.put(id, result);
+            log.info("User with id {} get from rest query and added to cache. Cache size is {}", id, userDtosCache.keySet().size());
+            return result;
+        }
+    }
+
     private UserDto findUserDtoInPage(PagedResult<BankAccountDto> baDtos, PagedResult<UserDto> userDtos, Long id) {
         int pageNumber = 0;
         int totalPages = userDtos.getTotalPages();
@@ -295,7 +343,7 @@ public class ReportsService {
 
         while (pageNumber < totalPages) {
             Optional<UserDto> result = innerDtos.getContent().stream().filter(b -> b.getId().equals(id)).findFirst();
-            if(result.isPresent()) {
+            if (result.isPresent()) {
                 return result.get();
             } else {
                 pageNumber++;
