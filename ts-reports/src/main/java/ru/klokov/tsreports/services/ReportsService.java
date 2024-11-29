@@ -107,7 +107,6 @@ public class ReportsService {
         int innerPageSize = pageSize == null ? 2000 : pageSize;
 
         PagedResult<TransactionDto> firstPage = getTransactionsByPeriod(periodDto, pageNumber, innerPageSize);
-        int transactionPage = 0;
         int totalPages = firstPage.getTotalPages();
 
         int availableProcessors = Runtime.getRuntime().availableProcessors();
@@ -156,33 +155,19 @@ public class ReportsService {
             for (Future<Void> future : futures) {
                 future.get();  // Ожидаем выполнения каждой задачи
             }
-            latch.await();
-            log.info("Fill reports to DB with concurrent ends at {} futures cycle ", LocalDateTime.now());
-            log.info("Method with concurrent works {} milliseconds", System.currentTimeMillis() - startTime);
         } catch (InterruptedException | ExecutionException e) {
             log.error("Error during parallel task execution", e);
         } finally {
             executor.shutdown();  // Завершаем работу пула потоков
             try {
                 latch.await();
-                log.info("latch count {} from main concurrent method", latch.getCount());
-                // Логируем каждые 2 секунды (можно настроить по вашему усмотрению)
-                Thread.sleep(100);
-                long remainingTime = System.currentTimeMillis() - startTime;
-                log.info("Waiting for threads to finish... {} ms elapsed", remainingTime);
             } catch (InterruptedException e) {
                 log.error("Error during waiting for threads to finish", e);
             }
 
-            log.info("Fill reports to DB with concurrent ends at {} 1", LocalDateTime.now());
-            log.info("Method with concurrent works {} milliseconds", System.currentTimeMillis() - startTime);
-
         }
 
-        log.info("Fill reports to DB with concurrent ends at {} ", LocalDateTime.now());
-        log.info("Method with concurrent works {} milliseconds", System.currentTimeMillis() - startTime);
-
-        log.info("Method with concurrent works {} milliseconds (new), end time is {}", maxEndTimeMillis.get() - startTime, maxEndTimeMillis);
+        log.info("Method with concurrent works {} milliseconds", maxEndTimeMillis.get() - startTime);
     }
 
     //но вроде как такое поведение идет по-умолчанию
@@ -200,7 +185,6 @@ public class ReportsService {
         log.info("Saved!");
     }
 
-    //но вроде как такое поведение идет по-умолчанию
     @Transactional(rollbackFor = RuntimeException.class)
     protected void saveListOfReportsWithTime(List<ReportEntity> reportEntities, CountDownLatch latch) {
         Random random = new Random();
