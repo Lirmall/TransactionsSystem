@@ -12,6 +12,9 @@
         <heap>1000</heap>
     </cache-template>
 
+    <cache alias="org.hibernate.cache.internal.StandardQueryCache"
+           uses-template="default"/>
+
     <cache alias="ru.klokov.tsaccounts.entities.UserEntity"
            uses-template="default"/>
 

@@ -1,9 +1,12 @@
 package ru.klokov.tsaccounts.services;
 
+import jakarta.persistence.QueryHint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.jpa.AvailableHints;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tscommon.dtos.BankAccountDto;
