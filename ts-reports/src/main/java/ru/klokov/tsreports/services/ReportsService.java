@@ -158,13 +158,12 @@ public class ReportsService {
         } catch (InterruptedException | ExecutionException e) {
             log.error("Error during parallel task execution", e);
         } finally {
-            executor.shutdown();  // Завершаем работу пула потоков
             try {
                 latch.await();
             } catch (InterruptedException e) {
                 log.error("Error during waiting for threads to finish", e);
             }
-
+            executor.shutdown();  // Завершаем работу пула потоков
         }
 
         log.info("Method with concurrent works {} milliseconds", maxEndTimeMillis.get() - startTime);
@@ -184,6 +183,7 @@ public class ReportsService {
         databaseRepository.saveAll(reportEntities);
         log.info("Saved!");
     }
+
 
     @Transactional(rollbackFor = RuntimeException.class)
     protected void saveListOfReportsWithTime(List<ReportEntity> reportEntities, CountDownLatch latch) {
