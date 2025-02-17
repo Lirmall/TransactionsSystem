@@ -4,12 +4,15 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(name = "bank_accounts")
 @Getter
 @Setter
 @NoArgsConstructor
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class BankAccountEntity {
 
     @Id
