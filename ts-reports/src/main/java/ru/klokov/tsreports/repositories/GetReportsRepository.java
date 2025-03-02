@@ -2,8 +2,8 @@ package ru.klokov.tsreports.repositories;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.*;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Repository;
@@ -17,16 +17,21 @@ import ru.klokov.tscommon.specifications.search_models.UserSearchModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
 @Repository
 @RequiredArgsConstructor
 public class GetReportsRepository {
-    private static final String TRANSACTIONS_URL = "http://localhost:8090/api/v1/common/transactions";
-    private static final String BANK_ACCOUNTS_URL = "http://localhost:8089/api/v1/common/bank_accounts";
-    private static final String USERS_URL = "http://localhost:8089/api/v1/common/users";
+    @Value("${ru.klokov.tssystem.transactions.url}")
+    private String transactionsUrl;
+
+    @Value("${ru.klokov.tssystem.accounts.url}")
+    private String bankAccountsUrl;
+
+    @Value("${ru.klokov.tssystem.users.url}")
+    private String usersUrl;
+
     private static final String FILTER = "/filter";
 
     private final RestTemplate restTemplate;
@@ -37,7 +42,7 @@ public class GetReportsRepository {
         ParameterizedTypeReference<PagedResult<TransactionDto>> typeReference = new ParameterizedTypeReference<>() {};
 
         PagedResult<TransactionDto> content =
-                restTemplate.exchange(TRANSACTIONS_URL + FILTER, HttpMethod.POST, new HttpEntity<>(searchModel),typeReference).getBody();
+                restTemplate.exchange(transactionsUrl + FILTER, HttpMethod.POST, new HttpEntity<>(searchModel),typeReference).getBody();
         assert content != null;
 
         return content;
@@ -66,7 +71,7 @@ public class GetReportsRepository {
         ParameterizedTypeReference<PagedResult<BankAccountDto>> typeReference = new ParameterizedTypeReference<>() {};
 
         PagedResult<BankAccountDto> result =
-                restTemplate.exchange(BANK_ACCOUNTS_URL + FILTER, HttpMethod.POST, new HttpEntity<>(model), typeReference).getBody();
+                restTemplate.exchange(bankAccountsUrl + FILTER, HttpMethod.POST, new HttpEntity<>(model), typeReference).getBody();
         assert result != null;
 
         return result;
@@ -81,7 +86,7 @@ public class GetReportsRepository {
         ParameterizedTypeReference<PagedResult<UserDto>> typeReference = new ParameterizedTypeReference<>() {};
 
         PagedResult<UserDto> result =
-                restTemplate.exchange(USERS_URL + FILTER, HttpMethod.POST, new HttpEntity<>(model), typeReference).getBody();
+                restTemplate.exchange(usersUrl + FILTER, HttpMethod.POST, new HttpEntity<>(model), typeReference).getBody();
         assert result != null;
 
         return result;

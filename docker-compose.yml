@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+  ts-accounts-db:
+    image: postgres:14.1
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pwpostgres
+      - POSTGRES_DB=ts-accounts
+    ports:
+      - "5434:5432"
+
+  ts-transactions-db:
+    image: postgres:14.1
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pwpostgres
+      - POSTGRES_DB=ts-transactions
+    ports:
+      - "5435:5432"
+
+  ts-reports-db:
+    image: postgres:14.1
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pwpostgres
+      - POSTGRES_DB=ts-reports
+    ports:
+      - "5436:5432"
+
+  ts-accounts:
+    build: ./ts-accounts
+    ports:
+      - "8089:8089"
+    depends_on:
+      - ts-accounts-db
+
+  ts-transactions:
+    build: ./ts-transactions
+    ports:
+      - "8090:8090"
+    depends_on:
+      - ts-transactions-db
+
+  ts-reports:
+    build: ./ts-reports
+    ports:
+      - "8091:8091"
+    depends_on:
+      - ts-reports-db
