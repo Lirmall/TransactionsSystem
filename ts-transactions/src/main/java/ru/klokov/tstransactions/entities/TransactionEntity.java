@@ -44,4 +44,12 @@ public class TransactionEntity {
 
     @Column(name = "transaction_date")
     private LocalDateTime transactionDate;
+
+    public boolean isRefundable() {
+        return !(this.getType().equals(TransactionType.REFUND) || this.getType().equals(TransactionType.CASH_WITHDRAWAL));
+    }
+
+    public boolean isCompleted() {
+        return (this.getStatus().equals(TransactionStatus.SUCCESS));
+    }
 }

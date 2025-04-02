@@ -11,7 +11,8 @@ public enum TransactionType {
     PAYMENT(1L, "Payment"),
     DEPOSIT(2L, "Deposit"),
     CASH_WITHDRAWAL(3L, "Cash Withdrawal"),
-    TRANSFER(4L, "Transfer");
+    TRANSFER(4L, "Transfer"),
+    REFUND(5L, "Refund");
 
     private final Long id;
     private final String name;

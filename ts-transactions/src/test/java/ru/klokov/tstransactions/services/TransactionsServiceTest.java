@@ -18,6 +18,7 @@ import ru.klokov.tscommon.specifications.SearchOperation;
 import ru.klokov.tstransactions.config.TestContainerConfExtension;
 import ru.klokov.tscommon.dtos.TransactionDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
+import ru.klokov.tstransactions.entities.enums.TransactionType;
 import ru.klokov.tstransactions.mappers.TransactionMapper;
 import ru.klokov.tstransactions.models.TransactionModel;
 import ru.klokov.tstransactions.repositories.DataRepository;
@@ -31,11 +32,11 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static ru.klokov.tstransactions.entities.enums.TransactionStatus.SUCCESS;
+import static ru.klokov.tstransactions.entities.enums.TransactionType.REFUND;
 import static ru.klokov.tstransactions.entities.enums.TransactionType.TRANSFER;
 
 @SpringBootTest
@@ -218,5 +219,64 @@ class TransactionsServiceTest {
         assertEquals("Deposit", dto3.getType());
         assertEquals("Success", dto3.getStatus());
         assertEquals(LocalDateTime.of(2024, 8, 28, 23, 11, 4, 366859000), dto3.getTransactionDate());
+    }
+
+    @Test
+    void refundTest() {
+        TransactionDto dto = new TransactionDto();
+        dto.setSenderId(1L);
+        dto.setRecipientId(2L);
+        dto.setAmount(120.0);
+        dto.setType(TRANSFER.getName());
+
+        Mockito.when(dataRepository.verifyBankAccount(anyLong())).thenReturn(true);
+        Mockito.when(dataRepository.checkBalanceForTransaction(anyLong(), anyDouble())).thenReturn(true);
+        Mockito.when(dataRepository.doTransaction(ArgumentMatchers.any(TransactionDataDto.class))).thenReturn(true);
+
+        TransactionModel createdTransaction = transactionsService.create(dto);
+
+        TransactionEntity transaction = transactionMapper.convertModelToEntity(createdTransaction);
+        assertNotNull(transaction);
+
+        assertNotNull(transaction.getId());
+        assertEquals(1L, transaction.getSenderId());
+        assertEquals(2L, transaction.getRecipientId());
+        assertEquals(120.0, transaction.getAmount());
+        assertEquals(SUCCESS, transaction.getStatus());
+        assertEquals(TRANSFER, transaction.getType());
+
+        TransactionModel refunded = transactionsService.refund(transaction.getId());
+        assertEquals(2L, refunded.getSenderId());
+        assertEquals(1L, refunded.getRecipientId());
+        assertEquals(120.0, refunded.getAmount());
+        assertEquals(SUCCESS.getName(), refunded.getStatus());
+        assertEquals(REFUND.getName(), refunded.getType());
+    }
+
+    @Test
+    void refundTestWithRefundType() {
+        TransactionDto dto = new TransactionDto();
+        dto.setSenderId(1L);
+        dto.setRecipientId(2L);
+        dto.setAmount(120.0);
+        dto.setType(REFUND.getName());
+
+        Mockito.when(dataRepository.verifyBankAccount(anyLong())).thenReturn(true);
+        Mockito.when(dataRepository.checkBalanceForTransaction(anyLong(), anyDouble())).thenReturn(true);
+        Mockito.when(dataRepository.doTransaction(ArgumentMatchers.any(TransactionDataDto.class))).thenReturn(true);
+
+        TransactionModel createdTransaction = transactionsService.create(dto);
+
+        TransactionEntity transaction = transactionMapper.convertModelToEntity(createdTransaction);
+        assertNotNull(transaction);
+
+        assertNotNull(transaction.getId());
+        assertEquals(1L, transaction.getSenderId());
+        assertEquals(2L, transaction.getRecipientId());
+        assertEquals(120.0, transaction.getAmount());
+        assertEquals(SUCCESS, transaction.getStatus());
+        assertEquals(REFUND, transaction.getType());
+
+        assertThrows(RuntimeException.class, () ->transactionsService.refund(transaction.getId()));
     }
 }

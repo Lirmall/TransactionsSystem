@@ -38,14 +38,25 @@ public class TransactionController {
     }
 
     @Operation(
-            summary = "Create new transaction",
-            method = "post")
+            summary = "Find transaction",
+            method = "get")
     @ApiResponse(responseCode = "200", description = "Request successful")
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @GetMapping("/{id}")
     public TransactionDto findById(@PathVariable("id") UUID id) {
         return transactionMapper.convertModelToDto(transactionsService.findById(id));
+    }
+
+    @Operation(
+            summary = "Refund transaction",
+            method = "get")
+    @ApiResponse(responseCode = "200", description = "Request successful")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    @GetMapping("/refund/{id}")
+    public TransactionDto refund(@PathVariable("id") UUID id) {
+        return transactionMapper.convertModelToDto(transactionsService.refund(id));
     }
 
     @Operation(
@@ -75,7 +86,7 @@ public class TransactionController {
 
     @Operation(
             summary = "Clear all transactions in DB",
-            method = "post")
+            method = "get")
     @ApiResponse(responseCode = "200", description = "Request successful")
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "500", description = "Internal server error")

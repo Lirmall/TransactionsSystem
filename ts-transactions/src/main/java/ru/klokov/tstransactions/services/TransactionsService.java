@@ -13,6 +13,7 @@ import ru.klokov.tscommon.exceptions.VerificationException;
 import ru.klokov.tscommon.specifications.search_models.TransactionSearchModel;
 import ru.klokov.tstransactions.entities.TransactionEntity;
 import ru.klokov.tstransactions.entities.enums.TransactionStatus;
+import ru.klokov.tstransactions.entities.enums.TransactionType;
 import ru.klokov.tstransactions.exceptions.TransactionFailedException;
 import ru.klokov.tstransactions.mappers.TransactionMapper;
 import ru.klokov.tstransactions.models.TransactionModel;
@@ -36,6 +37,10 @@ public class TransactionsService {
 
     @Transactional
     public TransactionModel create(TransactionDto dto) {
+        return privateCreate(dto);
+    }
+
+    public TransactionModel privateCreate(TransactionDto dto) {
         verifyBankAccountData(dto);
 
         TransactionEntity entityToSave = transactionMapper.convertDtoToEntity(dto);
@@ -110,5 +115,32 @@ public class TransactionsService {
     @Transactional
     public void clearTransactions() {
         transactionRepository.truncateTransactions();
+    }
+
+    @Transactional
+    public TransactionModel refund(UUID transactionId) {
+        if(transactionId == null) {
+            throw new RuntimeException("Transaction id is null");
+        }
+
+        Optional<TransactionEntity> transactionToRefund = transactionRepository.findById(transactionId);
+        TransactionEntity entityToRefund = transactionToRefund.orElseThrow(() -> new NoMatchingEntryInDatabaseException("Transaction with these parameters not found"));
+
+        checkRefundParameters(entityToRefund);
+
+        TransactionDto refundDto = transactionMapper.convertEntityToDto(entityToRefund);
+        refundDto.setId(null);
+        refundDto.setRecipientId(entityToRefund.getSenderId());
+        refundDto.setSenderId(entityToRefund.getRecipientId());
+        refundDto.setTypeId(TransactionType.REFUND.getId());
+        refundDto.setType(TransactionType.REFUND.getName());
+
+        return privateCreate(refundDto);
+    }
+
+    private static void checkRefundParameters(TransactionEntity entityToRefund) {
+        if (!entityToRefund.isRefundable() || entityToRefund.getTransactionDate().isAfter(LocalDateTime.now()) || !entityToRefund.isCompleted()) {
+            throw new RuntimeException("Cannot refund transaction with these parameters");
+        }
     }
 }

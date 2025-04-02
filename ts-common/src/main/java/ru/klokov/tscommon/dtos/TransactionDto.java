@@ -32,7 +32,7 @@ public class TransactionDto {
 
     @Schema(description = "Тип транзакции",
             requiredMode = Schema.RequiredMode.REQUIRED,
-            allowableValues = {"Payment", "Deposit", "Cash Withdrawal", "Transfer"})
+            allowableValues = {"Payment", "Deposit", "Cash Withdrawal", "Transfer", "Refund"})
     private String type;
 
     @Schema(description = "Идентификатор статуса транзакции", requiredMode = Schema.RequiredMode.REQUIRED)
