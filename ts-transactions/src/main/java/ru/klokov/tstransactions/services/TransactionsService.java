@@ -1,24 +1,18 @@
 package ru.klokov.tstransactions.services;
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.klokov.tscommon.dtos.TransactionDataDto;
 import ru.klokov.tscommon.dtos.TransactionDto;
 import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
-import ru.klokov.tscommon.exceptions.VerificationException;
 import ru.klokov.tscommon.specifications.search_models.TransactionSearchModel;
 import ru.klokov.tstransactions.entities.TransactionEntity;
-import ru.klokov.tstransactions.entities.enums.TransactionStatus;
 import ru.klokov.tstransactions.entities.enums.TransactionType;
-import ru.klokov.tstransactions.exceptions.TransactionFailedException;
 import ru.klokov.tstransactions.mappers.TransactionMapper;
 import ru.klokov.tstransactions.models.TransactionModel;
-import ru.klokov.tstransactions.repositories.DataRepository;
 import ru.klokov.tstransactions.repositories.TransactionRepository;
 import ru.klokov.tstransactions.specifications.TransactionSpecificationBuilder;
 import ru.klokov.tstransactions.specifications.sort.TransactionSortChecker;
@@ -36,39 +30,10 @@ public class TransactionsService {
     private final TransactionSortChecker sortChecker;
     private final TransactionManagementService transactionManagementService;
 
-//    @Transactional
     public TransactionModel create(TransactionDto dto) {
         TransactionModel transaction = transactionManagementService.createTransaction(dto);
         return transactionManagementService.completeTransaction(transaction);
     }
-
-//    private TransactionModel privateCreate(TransactionDto dto) {
-//        verifyBankAccountData(dto);
-//
-//        TransactionEntity entityToSave = transactionMapper.convertDtoToEntity(dto);
-//        entityToSave.setStatus(TransactionStatus.IN_PROGRESS);
-//        entityToSave.setTransactionDate(LocalDateTime.now());
-//
-//        UUID transactionId = transactionRepository.save(entityToSave).getId();
-//        entityManager.flush();
-//        entityManager.clear();
-//
-//        boolean successful = dataRepository.doTransaction(new TransactionDataDto(dto.getSenderId(), dto.getRecipientId(), dto.getAmount()));
-//        Optional<TransactionEntity> savedEntity = transactionRepository.findById(transactionId);
-//
-//        TransactionEntity transaction = savedEntity.orElseThrow(() -> new NoMatchingEntryInDatabaseException("Trouble with creating transaction"));
-//
-//        if (successful) {
-//            transaction.setStatus(TransactionStatus.SUCCESS);
-//            return transactionMapper.convertEntityToModel(transactionRepository.save(transaction));
-//        } else {
-//            transaction.setStatus(TransactionStatus.FAILED);
-//            log.error("Transaction between bank account {} and bank account id {} failed", dto.getSenderId(), dto.getRecipientId());
-//            throw new TransactionFailedException(String.format("Transaction between bank account %s and bank account id %s failed", dto.getSenderId(), dto.getRecipientId()));
-//        }
-//    }
-
-
 
     @Transactional(readOnly = true)
     public TransactionModel findById(UUID id) {
@@ -101,30 +66,6 @@ public class TransactionsService {
             return transactionRepository.findAll(pageable).map(transactionMapper::convertEntityToDto);
         }
     }
-
-//    private void verifyBankAccountData(TransactionDto transactionDto) {
-//        log.debug("Verify sender id");
-//        if (!dataRepository.verifyBankAccount(transactionDto.getSenderId())) {
-//            throw new VerificationException(String.format("Sender account with id %s does not exist", transactionDto.getRecipientId()));
-//        }
-//        log.debug("Sender id is verified");
-//
-//        log.debug("Verify recipient id");
-//        if (!dataRepository.verifyBankAccount(transactionDto.getRecipientId())) {
-//            throw new VerificationException(String.format("Recipient account with id %s does not exist", transactionDto.getRecipientId()));
-//        }
-//        log.debug("Recipient id is verified");
-//
-//        log.info("All ids are verified");
-//
-//        log.debug("Verify transaction amount");
-//        if (!dataRepository.checkBalanceForTransaction(transactionDto.getSenderId(), transactionDto.getAmount())) {
-//            throw new VerificationException(String.format("Recipient account with id %s doesn't have enough funds on balance", transactionDto.getRecipientId()));
-//        }
-//        log.debug("Amount is verified");
-//
-//        log.info("All transaction's data is verified");
-//    }
 
     @Transactional
     public void clearTransactions() {
