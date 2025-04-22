@@ -1,5 +1,6 @@
 package ru.klokov.tstransactions.services;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,11 +58,14 @@ class TransactionsServiceTest {
     @Autowired
     private TransactionSortChecker transactionSortChecker;
 
+    @Autowired
+    private EntityManager entityManager;
+
     private TransactionsService transactionsService;
 
     @BeforeEach
     void init() {
-        transactionsService = new TransactionsService(transactionRepository, dataRepository, transactionMapper, transactionSortChecker);
+        transactionsService = new TransactionsService(transactionRepository, dataRepository, transactionMapper, transactionSortChecker, entityManager);
     }
 
     @Test
