@@ -59,15 +59,13 @@ class TransactionsServiceTest {
     private TransactionSortChecker transactionSortChecker;
 
     @Autowired
-    private TransactionManagementService transactionManagementService;
-
-    @Autowired
     private EntityManager entityManager;
 
     private TransactionsService transactionsService;
 
     @BeforeEach
     void init() {
+        TransactionManagementService transactionManagementService = new TransactionManagementService(transactionRepository, dataRepository, transactionMapper);
         transactionsService = new TransactionsService(transactionRepository, transactionMapper, transactionSortChecker, transactionManagementService);
     }
 
