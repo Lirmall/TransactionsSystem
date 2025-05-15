@@ -9,7 +9,10 @@ import ru.klokov.tstransactions.config.enum_converters.StringToStatusConverter;
 import ru.klokov.tstransactions.config.enum_converters.StringToTypeConverter;
 import ru.klokov.tstransactions.config.enum_converters.TransactionStatusToStringConverter;
 import ru.klokov.tstransactions.config.enum_converters.TransactionTypeToStringConverter;
+import ru.klokov.tstransactions.dtos.soap.SoapTransactionRequestDto;
+import ru.klokov.tstransactions.dtos.soap.SoapTransactionResponseDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
+import ru.klokov.tstransactions.entities.enums.TransactionType;
 import ru.klokov.tstransactions.models.TransactionModel;
 
 @Component
@@ -50,5 +53,15 @@ public class TransactionMapper {
 
     public TransactionEntity convertModelToEntity(TransactionModel model) {
         return modelMapper.map(model, TransactionEntity.class);
+    }
+
+    public TransactionDto convertSoapRequestToDto(SoapTransactionRequestDto soapDto) {
+        TransactionDto dto = modelMapper.map(soapDto, TransactionDto.class);
+        dto.setType(TransactionType.getById(soapDto.getTypeId()).getName());
+        return dto;
+    }
+
+    public SoapTransactionResponseDto convertModelToSoaResponseDto(TransactionModel model) {
+        return modelMapper.map(model, SoapTransactionResponseDto.class);
     }
 }

@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.klokov.tscommon.dtos.TransactionDto;
 import ru.klokov.tscommon.exceptions.NoMatchingEntryInDatabaseException;
 import ru.klokov.tscommon.specifications.search_models.TransactionSearchModel;
+import ru.klokov.tstransactions.dtos.soap.SoapTransactionRequestDto;
+import ru.klokov.tstransactions.dtos.soap.SoapTransactionResponseDto;
 import ru.klokov.tstransactions.entities.TransactionEntity;
 import ru.klokov.tstransactions.entities.enums.TransactionType;
 import ru.klokov.tstransactions.mappers.TransactionMapper;
@@ -33,6 +35,13 @@ public class TransactionsService {
     public TransactionModel create(TransactionDto dto) {
         TransactionModel transaction = transactionManagementService.createTransaction(dto);
         return transactionManagementService.completeTransaction(transaction);
+    }
+
+    public SoapTransactionResponseDto soapCreateTransaction(SoapTransactionRequestDto dto) {
+        TransactionDto transactionDto = transactionMapper.convertSoapRequestToDto(dto);
+        TransactionModel transaction = transactionManagementService.createTransaction(transactionDto);
+        TransactionModel completed =  transactionManagementService.completeTransaction(transaction);
+        return transactionMapper.convertModelToSoaResponseDto(completed);
     }
 
     @Transactional(readOnly = true)
