@@ -60,7 +60,7 @@ public class TransactionController {
     }
 
     @Operation(
-            summary = "Create new transaction",
+            summary = "Find transaction by filter",
             method = "post")
     @ApiResponse(responseCode = "200", description = "Request successful")
     @ApiResponse(responseCode = "400", description = "Bad request")
