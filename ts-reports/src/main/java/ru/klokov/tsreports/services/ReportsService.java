@@ -26,6 +26,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 @RequiredArgsConstructor
 public class ReportsService {
+    private static final LocalDateTime DEFAULT_START_TIME = LocalDateTime.of(1970, 1, 1, 0, 0, 0, 1);
+
     private final ReportsDatabaseRepository databaseRepository;
     private final GetReportsRepository getReportsRepository;
     private final ReportsMapper reportsMapper;
@@ -34,17 +36,7 @@ public class ReportsService {
     public void fillAllOrNewReportsToDB() {
         long startTime = System.currentTimeMillis();
         log.info("Fill reports to DB starts at {}", LocalDateTime.now());
-        PeriodDto periodDto = new PeriodDto();
-        Optional<LocalDateTime> optionalLastReportDate = databaseRepository.getReportEntityWithMaxTransactionDate();
-
-        LocalDateTime lastReportDate = optionalLastReportDate.orElse(LocalDateTime.of(1970, 1, 1, 0, 0, 0, 1));
-
-        log.info("{}", lastReportDate);
-
-        periodDto.setPeriodStart(lastReportDate);
-        periodDto.setPeriodEnd(LocalDateTime.now().minusDays(1L).withHour(23).withMinute(59).withSecond(59).withNano(999999999));
-
-        log.info("{}", periodDto.getPeriodEnd());
+        PeriodDto periodDto = calculateReportsPeriod();
 
         int pageNumber = 0;
         int pageSize = 2000;
@@ -91,17 +83,7 @@ public class ReportsService {
     public void concurrentFillAllOrNewReportsToDB(@Nullable Integer pageSize, @Nullable Integer threadsCount) {
         long startTime = System.currentTimeMillis();
         log.info("Fill reports to DB with concurrent starts at {}", LocalDateTime.now());
-        PeriodDto periodDto = new PeriodDto();
-        Optional<LocalDateTime> optionalLastReportDate = databaseRepository.getReportEntityWithMaxTransactionDate();
-
-        LocalDateTime lastReportDate = optionalLastReportDate.orElse(LocalDateTime.of(1970, 1, 1, 0, 0, 0, 1));
-
-        log.info("{}", lastReportDate);
-
-        periodDto.setPeriodStart(lastReportDate);
-        periodDto.setPeriodEnd(LocalDateTime.now().minusDays(1L).withHour(23).withMinute(59).withSecond(59).withNano(999999999));
-
-        log.info("{}", periodDto.getPeriodEnd());
+        PeriodDto periodDto = calculateReportsPeriod();
 
         int pageNumber = 0;
         int innerPageSize = pageSize == null ? 2000 : pageSize;
@@ -109,25 +91,22 @@ public class ReportsService {
         PagedResult<TransactionDto> firstPage = getTransactionsByPeriod(periodDto, pageNumber, innerPageSize);
         int totalPages = firstPage.getTotalPages();
 
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
-        log.info("Available processors {}", totalPages);
-
-        if (threadsCount == null || threadsCount > availableProcessors) {
-            threadsCount = availableProcessors;
-        }
-
-        log.info("Threads {}", threadsCount);
-
-        ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
+        ExecutorService executor = getExecutorService(threadsCount, totalPages);
 
         List<Future<Void>> futures = new ArrayList<>();
-
         AtomicLong maxEndTimeMillis = new AtomicLong();
-
         ConcurrentHashMap<Long, BankAccountDto> bankAccountDtoCacheMap = new ConcurrentHashMap<>();
         ConcurrentHashMap<Long, UserDto> userDtoCacheMap = new ConcurrentHashMap<>();
         CountDownLatch latch = new CountDownLatch(totalPages);
 
+        concurrentSaveToDB(totalPages, executor, periodDto, innerPageSize, bankAccountDtoCacheMap, userDtoCacheMap, latch, maxEndTimeMillis, futures);
+
+        waitForComplete(futures, latch, executor);
+
+        log.info("Method with concurrent works {} milliseconds", maxEndTimeMillis.get() - startTime);
+    }
+
+    private void concurrentSaveToDB(int totalPages, ExecutorService executor, PeriodDto periodDto, int innerPageSize, ConcurrentHashMap<Long, BankAccountDto> bankAccountDtoCacheMap, ConcurrentHashMap<Long, UserDto> userDtoCacheMap, CountDownLatch latch, AtomicLong maxEndTimeMillis, List<Future<Void>> futures) {
         for (int page = 0; page < totalPages; page++) {
             int finalPageNumber = page;
             Future<Void> future = executor.submit(() -> {
@@ -150,7 +129,9 @@ public class ReportsService {
 
             futures.add(future);
         }
+    }
 
+    private static void waitForComplete(List<Future<Void>> futures, CountDownLatch latch, ExecutorService executor) {
         try {
             for (Future<Void> future : futures) {
                 future.get();  // Ожидаем выполнения каждой задачи
@@ -165,8 +146,34 @@ public class ReportsService {
             }
             executor.shutdown();  // Завершаем работу пула потоков
         }
+    }
 
-        log.info("Method with concurrent works {} milliseconds", maxEndTimeMillis.get() - startTime);
+    private PeriodDto calculateReportsPeriod() {
+        PeriodDto periodDto = new PeriodDto();
+        Optional<LocalDateTime> optionalLastReportDate = databaseRepository.getReportEntityWithMaxTransactionDate();
+
+        LocalDateTime lastReportDate = optionalLastReportDate.orElse(DEFAULT_START_TIME);
+
+        log.info("{}", lastReportDate);
+
+        periodDto.setPeriodStart(lastReportDate);
+        periodDto.setPeriodEnd(LocalDateTime.now().minusDays(1L).withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+
+        log.info("{}", periodDto.getPeriodEnd());
+        return periodDto;
+    }
+
+    private static ExecutorService getExecutorService(Integer threadsCount, int totalPages) {
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        log.info("Available processors {}", totalPages);
+
+        if (threadsCount == null || threadsCount > availableProcessors) {
+            threadsCount = availableProcessors;
+        }
+
+        log.info("Threads {}", threadsCount);
+
+        return Executors.newFixedThreadPool(threadsCount);
     }
 
     //но вроде как такое поведение идет по-умолчанию
