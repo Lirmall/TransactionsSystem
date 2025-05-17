@@ -194,20 +194,21 @@ public class ReportsService {
 
     @Transactional(rollbackFor = RuntimeException.class)
     protected void saveListOfReportsWithTime(List<ReportEntity> reportEntities, CountDownLatch latch) {
-        Random random = new Random();
-        int randomNumber = random.nextInt(5);
-        log.info("random number is {}", randomNumber);
-        if (randomNumber == 1) {
-            log.warn("Try to fail");
+        try {
+            Random random = new Random();
+            int randomNumber = random.nextInt(5);
+            log.info("random number is {}", randomNumber);
+            if (randomNumber == 1) {
+                log.warn("Try to fail");
+                throw new RuntimeException("Fail to record");
+            }
+
+            databaseRepository.saveAll(reportEntities);
+            log.info("Saved!");
+        } finally {
             latch.countDown();
             log.info("latch {}", latch.getCount());
-            throw new RuntimeException("Fail to record");
         }
-
-        databaseRepository.saveAll(reportEntities);
-        log.info("Saved!");
-        latch.countDown();
-        log.info("latch {}", latch.getCount());
     }
 
     @Transactional
