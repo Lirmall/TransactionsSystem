@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Обновление системы и установка зависимостей
 RUN apt-get update && \
      apt-get install -y \
+            curl \
             python3 \
             python3-pip \
             ansible \
@@ -18,7 +19,7 @@ RUN apt-get update && \
 
 WORKDIR /azp
 
-ARG AGENT_VERSION=2.194.0
+ARG AGENT_VERSION=3.242.1
 
 ARG AZP_AGENTPACKAGE_URL=https://vstsagentpackage.azureedge.net/agent/${AGENT_VERSION}/vsts-agent-linux-x64-${AGENT_VERSION}.tar.gz
 RUN curl -LsS "$AZP_AGENTPACKAGE_URL" | tar -xz
