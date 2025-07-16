@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  build-agent:
+    build: .
+    container_name: build-agent
+    environment:
+      - AZP_URL
+      - AZP_POOL
+      - AZP_AGENT_NAME
+      - AZP_TOKEN
