@@ -17,6 +17,9 @@ RUN apt-get update && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/*
 
+# Создаём пользователя azp и группу azp
+RUN groupadd azp && useradd -m -g azp azp
+
 WORKDIR /azp
 
 ARG AGENT_VERSION=3.242.1
@@ -26,5 +29,11 @@ RUN curl -LsS "$AZP_AGENTPACKAGE_URL" | tar -xz
 
 COPY ./start.sh .
 RUN chmod +x start.sh
+
+# Меняем владельца каталога /azp на пользователя azp
+RUN chown -R azp:azp /azp
+
+# Переключаемся на пользователя azp
+USER azp
 
 ENTRYPOINT [ "./start.sh" ]
