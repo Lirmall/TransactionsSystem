@@ -3,7 +3,7 @@ version: '3'
 services:
   build-agent:
     build: .
-    container_name: TS-build-agent
+    container_name: ts-build-agent
     environment:
       - AZP_URL
       - AZP_POOL
