@@ -29,6 +29,10 @@ echo "Configuring Azure Pipelines agent..."
   --pool "$AZP_POOL" \
   --acceptTeeEula
 
+# Удаляем токен из окружения
+echo "Delete azp_token from environment..."
+unset AZP_TOKEN
+
 # Запуск агента
 echo "Starting agent..."
 ./run.sh
