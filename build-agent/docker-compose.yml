@@ -10,3 +10,4 @@ services:
       - AZP_AGENT_NAME
       - AZP_TOKEN
     user: "1000:1000"
+    restart: always
