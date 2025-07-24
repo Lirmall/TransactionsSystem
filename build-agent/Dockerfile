@@ -13,7 +13,10 @@ RUN apt-get update && \
             ansible \
             docker.io \
             nodejs \
-            npm && \
+            npm \
+            openjdk-17-jdk \
+            maven \
+            git && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/*
 
