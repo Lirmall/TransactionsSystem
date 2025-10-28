@@ -1,0 +1,6 @@
+spring.datasource.url=jdbc:postgresql://{{ db_host }}:{{ db_port }}/ts-transactions
+spring.datasource.username={{ db_user }}
+spring.datasource.password={{ db_password }}
+
+# если нужно параметризовать URL на accounts:
+ru.klokov.tssystem.accounts.url=http://{{ accounts_host }}:{{ accounts_port }}/api/v1/common/bank_accounts

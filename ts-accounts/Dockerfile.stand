@@ -1,0 +1,10 @@
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY target/*.jar app.jar
+
+# опционально пробрасывать JVM флаги
+ENV JAVA_TOOL_OPTIONS=""
+ENV SPRING_PROFILES_ACTIVE=stand
+
+EXPOSE 8089
+ENTRYPOINT ["sh","-c","exec java $JAVA_TOOL_OPTIONS -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar app.jar"]

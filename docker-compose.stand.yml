@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  ts-accounts:
+    environment:
+      - SPRING_PROFILES_ACTIVE=stand
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5434/ts-accounts
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=pwpostgres
+
+  ts-transactions:
+    environment:
+      - SPRING_PROFILES_ACTIVE=stand
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5435/ts-transactions
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=pwpostgres
+      # REST URL на accounts (если нужно):
+      - RU_KLOKOV_TSSYSTEM_ACCOUNTS_URL=http://host.docker.internal:8089/api/v1/common/bank_accounts
+
+  ts-reports:
+    environment:
+      - SPRING_PROFILES_ACTIVE=stand
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5436/ts-reports
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=pwpostgres

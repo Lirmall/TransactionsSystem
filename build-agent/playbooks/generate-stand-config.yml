@@ -1,0 +1,42 @@
+- hosts: localhost
+  connection: local
+
+  vars:
+    db_user: "postgres"
+    db_password: "pwpostgres"
+    accounts_host: "host.docker.internal"
+    accounts_port: 8089
+
+    # адрес хоста для БД (на той же ВМ, куда деплоишь контейнеры)
+    db_host: "host.docker.internal"
+
+    # порты БД по модулям
+    ports:
+      accounts: 5434
+      transactions: 5435
+      reports: 5436
+
+  tasks:
+    - name: Render ts-accounts application-stand.properties
+      template:
+        src: ts-accounts/src/main/resources/application-stand.properties.j2
+        dest: ts-accounts/src/main/resources/application-stand.properties
+        mode: '0644'
+      vars:
+        db_port: "{{ ports.accounts }}"
+
+    - name: Render ts-transactions application-stand.properties
+      template:
+        src: ts-transactions/src/main/resources/application-stand.properties.j2
+        dest: ts-transactions/src/main/resources/application-stand.properties
+        mode: '0644'
+      vars:
+        db_port: "{{ ports.transactions }}"
+
+    - name: Render ts-reports application-stand.properties
+      template:
+        src: ts-reports/src/main/resources/application-stand.properties.j2
+        dest: ts-reports/src/main/resources/application-stand.properties
+        mode: '0644'
+      vars:
+        db_port: "{{ ports.reports }}"

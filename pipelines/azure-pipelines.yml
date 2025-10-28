@@ -1,0 +1,51 @@
+# pipelines/azure-pipelines.yml
+trigger:
+  branches:
+    include:
+      - master
+
+# Если не нужен автозапуск от PR:
+# pr: none
+
+pool:
+  name: MySelfHostedPool
+
+variables:
+  # Профиль на уровне сборки (дублируем то, что задаем в compose)
+  SPRING_PROFILES_ACTIVE: stand
+
+jobs:
+  - job: BuildAndRunOnStand
+    displayName: "Build & Run (stand)"
+    steps:
+      - checkout: self
+
+      - script: |
+          java -version
+          mvn -v
+          docker version
+          docker compose version || true
+        displayName: "Версии инструментов"
+
+      # Генерация application-stand.properties из .j2
+      # Скипнуть шаг, если ENV из compose тебе хватает.
+      - script: |
+          set -e
+          ansible --version
+          ansible-playbook infra/generate-stand-config.yml
+        displayName: "Ansible: рендер stand-конфигов"
+        condition: exists('infra/generate-stand-config.yml')
+
+      - script: |
+          set -e
+          mvn -T 1C -DskipTests clean package
+        displayName: "Maven build (skip tests)"
+
+      # Сборка и запуск контейнеров на этой же ВМ.
+      # Используем overlay: base + stand (в stand — ENV с БД/профилем).
+      - script: |
+          set -e
+          docker compose -f docker-compose.base.yml -f docker-compose.stand.yml down || true
+          docker compose -f docker-compose.base.yml -f docker-compose.stand.yml up -d --build
+          docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+        displayName: "Docker Compose: up (stand)"
