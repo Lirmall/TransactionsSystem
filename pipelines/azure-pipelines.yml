@@ -1,51 +1,60 @@
-# pipelines/azure-pipelines.yml
 trigger:
   branches:
     include:
       - master
 
-# Если не нужен автозапуск от PR:
-# pr: none
-
 pool:
-  name: MySelfHostedPool
+  name: MySelfHostedPool   # твой self-hosted агент (контейнер)
 
 variables:
-  # Профиль на уровне сборки (дублируем то, что задаем в compose)
-  SPRING_PROFILES_ACTIVE: stand
+  REGISTRY: 'myregistry.company.ru'
+  IMAGE_TAG: '$(Build.BuildId)'
 
 jobs:
-  - job: BuildAndRunOnStand
-    displayName: "Build & Run (stand)"
+  - job: BuildAndDeploy
+    displayName: "Build images & deploy to stand"
     steps:
       - checkout: self
 
       - script: |
-          java -version
-          mvn -v
           docker version
-          docker compose version || true
-        displayName: "Версии инструментов"
+        displayName: "Check docker"
 
-      # Генерация application-stand.properties из .j2
-      # Скипнуть шаг, если ENV из compose тебе хватает.
+      - script: |
+          echo "$(REGISTRY_PASSWORD)" | docker login $(REGISTRY) --username "$(REGISTRY_USERNAME)" --password-stdin
+        displayName: "Docker login"
+
+      # Собираем три образа из Dockerfile.stand каждого модуля
+      # ВАЖНО: контекст сборки — корень repo (.), потому что Dockerfile.stand копирует pom.xml и модули
       - script: |
           set -e
+          
+          docker build -f ts-accounts/Dockerfile.stand \
+            -t $(REGISTRY)/ts-accounts:$(IMAGE_TAG) .
+          
+          docker build -f ts-transactions/Dockerfile.stand \
+            -t $(REGISTRY)/ts-transactions:$(IMAGE_TAG) .
+          
+          docker build -f ts-reports/Dockerfile.stand \
+            -t $(REGISTRY)/ts-reports:$(IMAGE_TAG) .
+        displayName: "Docker build (all services)"
+
+      - script: |
+          set -e
+          docker push $(REGISTRY)/ts-accounts:$(IMAGE_TAG)
+          docker push $(REGISTRY)/ts-transactions:$(IMAGE_TAG)
+          docker push $(REGISTRY)/ts-reports:$(IMAGE_TAG)
+        displayName: "Docker push (all services)"
+
+      - script: |
+          docker logout $(REGISTRY)
+        displayName: "Docker logout"
+
+      # Deploy через Ansible: генерим compose на стенде и дергаем docker_compose
+      - script: |
+          set -e
+          export IMAGE_TAG="$(IMAGE_TAG)"
           ansible --version
-          ansible-playbook infra/generate-stand-config.yml
-        displayName: "Ansible: рендер stand-конфигов"
-        condition: exists('infra/generate-stand-config.yml')
-
-      - script: |
-          set -e
-          mvn -T 1C -DskipTests clean package
-        displayName: "Maven build (skip tests)"
-
-      # Сборка и запуск контейнеров на этой же ВМ.
-      # Используем overlay: base + stand (в stand — ENV с БД/профилем).
-      - script: |
-          set -e
-          docker compose -f docker-compose.base.yml -f docker-compose.stand.yml down || true
-          docker compose -f docker-compose.base.yml -f docker-compose.stand.yml up -d --build
-          docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
-        displayName: "Docker Compose: up (stand)"
+          ansible-playbook -i infra/inventory/hosts.yml infra/deploy-stand.yml \
+            --extra-vars "registry_user=$(REGISTRY_USERNAME) registry_password=$(REGISTRY_PASSWORD)"
+        displayName: "Ansible deploy to stand"

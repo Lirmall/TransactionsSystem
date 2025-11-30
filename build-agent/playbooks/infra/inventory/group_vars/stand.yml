@@ -1,0 +1,29 @@
+# Имя registry и образы (тег из пайплайна через extra-vars)
+registry: "harbor.parmalogica.ru"
+
+image_tag: "latest"   # по умолчанию; в пайплайне можно переопределить
+
+ts_transactions_image: "{{ registry }}/ts-transactions:{{ image_tag }}"
+ts_accounts_image:    "{{ registry }}/ts-accounts:{{ image_tag }}"
+ts_reports_image:     "{{ registry }}/ts-reports:{{ image_tag }}"
+
+# Параметры БД
+db_host: "localhost"
+db_user: "postgres"
+db_password: "pwpostgres"
+db_accounts_port: 5434
+db_transactions_port: 5435
+db_reports_port: 5436
+
+# Порты сервисов
+accounts_port: 8089
+transactions_port: 8090
+reports_port: 8091
+
+# Куда кладём compose на стенде
+docimage_dir: "/opt/transactions-system"
+owner_uid: 1000
+owner_guid: 1000
+
+# Registry (логин/пароль берём из vault/extra-vars)
+docker_registry: "{{ registry }}"

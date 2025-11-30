@@ -1,10 +1,56 @@
-FROM eclipse-temurin:17-jre
-WORKDIR /app
-COPY target/*.jar app.jar
+# ---------- stage 1: builder ----------
+# здесь должен быть  корпоративный образ с maven и jdk
+# пока пример
+FROM harbor.parmalogica.ru/base/maven:3.9.8-eclipse-temurin-17-focal AS builder
 
-# опционально пробрасывать JVM флаги
-ENV JAVA_TOOL_OPTIONS=""
-ENV SPRING_PROFILES_ACTIVE=stand
+WORKDIR /app
+
+# Копируем корневой pom и pom'ы модулей, чтобы прогреть зависимости
+COPY pom.xml .
+COPY ts-common/pom.xml ts-common/pom.xml
+COPY ts-accounts/pom.xml ts-accounts/pom.xml
+COPY ts-transactions/pom.xml ts-transactions/pom.xml
+COPY ts-reports/pom.xml ts-reports/pom.xml
+
+# Теперь копируем исходники
+COPY ts-common/ ts-common/
+COPY ts-accounts/ ts-accounts/
+COPY ts-transactions/ ts-transactions/
+COPY ts-reports/ ts-reports/
+
+# Кешируем зависимости
+# RUN mvn -B -q -DskipTests dependency:go-offline
+
+# Кешируем зависимости
+RUN mvn -B -q -pl ts-accounts -am -DskipTests package
+
+# Собираем только ts-accounts (+ его зависимости)
+RUN mvn -B -DskipTests -pl ts-accounts -am package
+
+# ---------- stage 2: runtime ----------
+FROM bellsoft/liberica-openjre-debian:17.0.12
+
+ARG BUILD_NUMBER
+ENV SPRING_APPLICATION_VERSION=${BUILD_NUMBER}
+
+# Нерутовый пользователь
+ENV UID=1000 GID=1000 UNAME=app GNAME=app
+RUN set -eux \
+    && groupadd --gid "${GID}" "${GNAME}" \
+    && useradd \
+         --shell /bin/bash \
+         --no-create-home \
+         --uid "${UID}" \
+         --gid "${GID}" \
+         "${UNAME}"
+
+WORKDIR /app
+USER ${UNAME}
+
+# Копируем собранный jar конкретного модуля
+COPY --from=builder --chown=${UID}:${GID} /app/ts-accounts/target/*.jar app.jar
 
 EXPOSE 8089
-ENTRYPOINT ["sh","-c","exec java $JAVA_TOOL_OPTIONS -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar app.jar"]
+
+# Никаких профилей/URL внутри образа — только ENV на запуске
+ENTRYPOINT ["java", "-jar", "app.jar"]

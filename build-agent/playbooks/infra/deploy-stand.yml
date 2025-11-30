@@ -1,0 +1,53 @@
+---
+- hosts: stand
+  become: true
+
+  vars:
+    # сюда из пайплайна приходит актуальный тег
+    image_tag: "{{ lookup('env', 'IMAGE_TAG') | default('latest', true) }}"
+
+  tasks:
+    - name: Create dirs
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ owner_uid }}"
+        group: "{{ owner_guid }}"
+        mode: "0755"
+      with_items:
+        - "{{ docimage_dir }}"
+
+    - name: Copy compose template
+      template:
+        src: "infra/templates/docker-compose.stand.yml.j2"
+        dest: "{{ docimage_dir }}/docker-compose.yml"
+        owner: "{{ owner_uid }}"
+        group: "{{ owner_guid }}"
+        mode: "0644"
+
+    - name: upgrade pip
+      ansible.builtin.shell: "pip3 install --upgrade pip -i {{ pypi_repo | default('https://pypi.org/simple') }}"
+
+    - name: Install docker pypi packages
+      ansible.builtin.pip:
+        name: "{{ item }}"
+      loop:
+        - docker
+        - docker-compose
+
+    - name: Log into private registry and force re-authorization
+      community.docker.docker_login:
+        registry: "{{ docker_registry }}"
+        username: "{{ registry_user }}"
+        password: "{{ registry_password }}"
+        reauthorize: yes
+
+    - name: Start compose
+      community.docker.docker_compose:
+        project_src: "{{ docimage_dir }}"
+      register: dc_output
+
+    - name: Log out of private docker registry
+      community.docker.docker_login:
+        state: absent
+        registry: "{{ docker_registry }}"

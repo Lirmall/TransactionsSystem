@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+  ts-accounts:
+    image: "{{ ts_accounts_image }}"
+    container_name: ts-accounts
+    ports:
+      - "{{ accounts_port }}:{{ accounts_port }}"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://{{ db_host }}:{{ db_accounts_port }}/ts-accounts"
+      SPRING_DATASOURCE_USERNAME: "{{ db_user }}"
+      SPRING_DATASOURCE_PASSWORD: "{{ db_password }}"
+    restart: always
+
+  ts-transactions:
+    image: "{{ ts_transactions_image }}"
+    container_name: ts-transactions
+    ports:
+      - "{{ transactions_port }}:{{ transactions_port }}"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://{{ db_host }}:{{ db_transactions_port }}/ts-transactions"
+      SPRING_DATASOURCE_USERNAME: "{{ db_user }}"
+      SPRING_DATASOURCE_PASSWORD: "{{ db_password }}"
+      RU_KLOKOV_TSSYSTEM_ACCOUNTS_URL: "http://ts-accounts:{{ accounts_port }}/api/v1/common/bank_accounts"
+    depends_on:
+      - ts-accounts
+    restart: always
+
+  ts-reports:
+    image: "{{ ts_reports_image }}"
+    container_name: ts-reports
+    ports:
+      - "{{ reports_port }}:{{ reports_port }}"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://{{ db_host }}:{{ db_reports_port }}/ts-reports"
+      SPRING_DATASOURCE_USERNAME: "{{ db_user }}"
+      SPRING_DATASOURCE_PASSWORD: "{{ db_password }}"
+    restart: always
+
+networks:
+  default:
+    name: "ts-stand"
