@@ -28,18 +28,14 @@ public class TransactionSpecification implements Specification<TransactionEntity
             return uuidHandler(criteria.getFieldValue(), root, query, criteriaBuilder);
         }
 
-        switch (criteria.getSearchOperation()) {
-            case GREATER_THAN:
-                return criteriaBuilder.greaterThanOrEqualTo(
-                        root.<String>get(criteria.getFieldName()), criteria.getFieldValue().toString());
-            case LESS_THAN:
-                return criteriaBuilder.lessThanOrEqualTo(
-                        root.<String>get(criteria.getFieldName()), criteria.getFieldValue().toString());
-            case EQUALITY:
-                return criteriaBuilder.equal(root.get(criteria.getFieldName()), criteria.getFieldValue());
-            default:
-                return null;
-        }
+        return switch (criteria.getSearchOperation()) {
+            case GREATER_THAN -> criteriaBuilder.greaterThanOrEqualTo(
+                    root.<String>get(criteria.getFieldName()), criteria.getFieldValue().toString());
+            case LESS_THAN -> criteriaBuilder.lessThanOrEqualTo(
+                    root.<String>get(criteria.getFieldName()), criteria.getFieldValue().toString());
+            case EQUALITY -> criteriaBuilder.equal(root.get(criteria.getFieldName()), criteria.getFieldValue());
+            default -> null;
+        };
     }
 
     private Predicate localDateTimeHandler(Object date, Root<TransactionEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
